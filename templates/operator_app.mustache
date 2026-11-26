@@ -55,7 +55,7 @@
     <h1>{{#str}}op_title, local_evenements{{/str}}</h1>
     <p>{{#str}}op_loginhelp, local_evenements{{/str}}</p>
     <form id="loginform" autocomplete="off">
-        <input type="text" id="code" placeholder="XXXX-XXXX-XXXX-XXXX" aria-label="{{#str}}op_code, local_evenements{{/str}}" autocapitalize="characters" autocorrect="off" spellcheck="false" required>
+        <input type="text" id="code" placeholder="XXXX-XXXX-XXXX-XXXX" aria-label="{{#str}}op_code, local_evenements{{/str}}" autocapitalize="characters" spellcheck="false" required>
         <button class="btn" type="submit">{{#str}}op_login, local_evenements{{/str}}</button>
     </form>
     <p class="error" id="loginerr" role="alert"></p>
@@ -68,7 +68,7 @@
         <div class="title"><strong id="evname"></strong><span id="opname"></span></div>
         <span class="dot" id="dot"></span><span id="netlabel" class="muted" style="color:#fff"></span>
     </header>
-    <main>
+    <div class="opmain">
         <div class="counter">
             <div class="big" id="count"></div>
             <div class="muted">{{#str}}op_entries, local_evenements{{/str}}</div>
@@ -88,7 +88,7 @@
             <ul id="recentlist"></ul>
         </div>
         <p style="text-align:center"><button class="btn small secondary" id="btnlogout" type="button">{{#str}}op_logout, local_evenements{{/str}}</button></p>
-    </main>
+    </div>
 </section>
 
 <div id="camera" class="hidden">
@@ -98,13 +98,13 @@
     <button class="btn close" id="camclose" type="button">{{#str}}op_stop, local_evenements{{/str}}</button>
 </div>
 
-<div id="search" class="hidden" style="position:fixed;inset:0;z-index:25;background:var(--bg);overflow:auto;padding:1rem;padding-top:calc(env(safe-area-inset-top) + 1rem)">
+<div id="search" class="hidden overlay">
     <input type="search" id="q" placeholder="{{#str}}op_searchph, local_evenements{{/str}}" aria-label="{{#str}}op_search, local_evenements{{/str}}" autocomplete="off">
     <div class="panel results" style="margin-top:1rem"><ul id="searchlist"></ul></div>
     <button class="btn secondary" id="searchclose" type="button">{{#str}}op_close, local_evenements{{/str}}</button>
 </div>
 
-<div id="manual" class="hidden" style="position:fixed;inset:0;z-index:25;background:var(--bg);padding:1rem;padding-top:calc(env(safe-area-inset-top) + 1rem)">
+<div id="manual" class="hidden overlay">
     <form id="manualform">
         <input type="text" id="manualcode" placeholder="{{#str}}op_manualph, local_evenements{{/str}}" aria-label="{{#str}}op_manual, local_evenements{{/str}}" autocomplete="off" autocapitalize="off" spellcheck="false">
         <button class="btn" type="submit" style="margin-top:1rem">{{#str}}op_check, local_evenements{{/str}}</button>
