@@ -26,7 +26,6 @@ namespace local_evenements;
  * @covers     \local_evenements\report_manager
  */
 final class report_manager_test extends \advanced_testcase {
-
     /**
      * Event that took place two hours ago, with five tickets: three used, one twice, one cancelled.
      *
@@ -71,7 +70,8 @@ final class report_manager_test extends \advanced_testcase {
         $this->assertEquals(4, $r->booked);
         $this->assertEquals(3, $r->attended);
         $this->assertEquals(1, $r->cancelled);
-        $this->assertEquals(['booked' => 2, 'attended' => 1], array_intersect_key($r->categories[0], ['booked' => 0, 'attended' => 0]));
+        $this->assertEquals(2, $r->categories[0]['booked']);
+        $this->assertEquals(1, $r->categories[0]['attended']);
         $this->assertEquals(2, $r->categories[1]['attended']);
         $this->assertEquals(3, array_sum($r->arrivals));
         $this->assertEquals(1, $r->alreadyused);

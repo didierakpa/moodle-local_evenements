@@ -31,7 +31,6 @@ require_once($CFG->dirroot . '/cohort/lib.php');
  * @covers     \local_evenements\moodle_import
  */
 final class moodle_import_test extends \advanced_testcase {
-
     /**
      * New open event.
      *
@@ -103,8 +102,11 @@ final class moodle_import_test extends \advanced_testcase {
 
         $report = moodle_import::add($event, moodle_import::people('cohort', $cohortid), (object) ['sourcename' => 'Cohort']);
         $this->assertEquals(3, $report->added);
-        $this->assertEquals($users[1]->id, $DB->get_field('local_evenements_booking', 'userid',
-            ['eventid' => $event->id, 'email' => $users[1]->email]));
+        $this->assertEquals($users[1]->id, $DB->get_field(
+            'local_evenements_booking',
+            'userid',
+            ['eventid' => $event->id, 'email' => $users[1]->email]
+        ));
 
         $report = moodle_import::add($event, moodle_import::people('course', $course->id, $student), (object) []);
         $this->assertEquals(1, $report->added);

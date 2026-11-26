@@ -26,7 +26,6 @@ namespace local_evenements;
  * @covers     \local_evenements\participant_manager
  */
 final class participant_manager_test extends \advanced_testcase {
-
     /**
      * New open event.
      *
@@ -119,8 +118,11 @@ final class participant_manager_test extends \advanced_testcase {
             'lastname' => 'Martin-Dupont', 'note' => 'Final year', 'contactname' => 'Mrs Martin']);
         $this->assertCount(3, $changes);
         $this->assertEquals('Martin-Dupont', $this->reload((int) $ticket->id)->lastname);
-        $this->assertSame([], participant_manager::update_ticket($event, $this->reload((int) $ticket->id),
-            (object) ['lastname' => 'Martin-Dupont']));
+        $this->assertSame([], participant_manager::update_ticket(
+            $event,
+            $this->reload((int) $ticket->id),
+            (object) ['lastname' => 'Martin-Dupont']
+        ));
 
         $log = participant_manager::get_log((int) $event->id, 0, (int) $ticket->id);
         $actions = array_map(function ($row) {
@@ -189,8 +191,11 @@ final class participant_manager_test extends \advanced_testcase {
         $this->assertFalse($DB->record_exists('local_evenements_ticket', ['id' => $ticket->id]));
         $this->assertFalse($DB->record_exists('local_evenements_booking', ['id' => $booking->id]));
         $this->assertFalse($DB->record_exists('local_evenements_scanlog', ['ticketid' => $ticket->id]));
-        $this->assertFalse($DB->record_exists_select('local_evenements_changelog',
-            'ticketid = ? AND ' . $DB->sql_like('details', '?'), [$ticket->id, '%Petit%']));
+        $this->assertFalse($DB->record_exists_select(
+            'local_evenements_changelog',
+            'ticketid = ? AND ' . $DB->sql_like('details', '?'),
+            [$ticket->id, '%Petit%']
+        ));
     }
 
     /**
@@ -225,8 +230,17 @@ final class participant_manager_test extends \advanced_testcase {
         $this->setAdminUser();
         $event = $this->make_event(0, ['accessmode' => 'list', 'guestquota' => 2]);
         $invitee = booking_manager::add_invitee($event, 'Sam', 'Roux', 'sam@example.com', 'Graduate');
-        $booking = booking_manager::create_booking($event, 'Sam Roux', 'sam@example.com', 0,
-            [['firstname' => 'Sam', 'lastname' => 'Roux', 'tickettypeid' => $invitee->tickettypeid]], '127.0.0.1', [], 0, $invitee);
+        $booking = booking_manager::create_booking(
+            $event,
+            'Sam Roux',
+            'sam@example.com',
+            0,
+            [['firstname' => 'Sam', 'lastname' => 'Roux', 'tickettypeid' => $invitee->tickettypeid]],
+            '127.0.0.1',
+            [],
+            0,
+            $invitee
+        );
         $ticket = $this->ticket_of($booking);
 
         participant_manager::cancel_ticket($event, $ticket);
