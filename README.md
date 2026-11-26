@@ -4,7 +4,7 @@ Plugin Moodle (type *local*) pour organiser les événements du lycée (JPO, rem
 forum des métiers…) : réservation en ligne, **billets nominatifs avec QR code**, billet PDF
 personnalisable, contrôle à l'entrée, export d'émargement.
 
-Version : **0.14.0 (alpha)** — squelette fonctionnel, à tester sur un Moodle de test avant toute mise en production.
+Version : **1.0.0 (stable)** — squelette fonctionnel, à tester sur un Moodle de test avant toute mise en production.
 Licence : GNU GPL v3 ou ultérieure.
 
 ## Nouveautés de la 0.14.0
