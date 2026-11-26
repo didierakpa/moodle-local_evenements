@@ -16,8 +16,6 @@
 
 namespace local_evenements;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Changes made by organisers to the participants of an event: edit, cancel, restore,
  * delete for good, add by hand, send the tickets again. Every change is written to the change log.
@@ -27,7 +25,6 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class participant_manager {
-
     /** @var string[] Actions of the change log. */
     public const ACTIONS = ['add', 'edit', 'cancel', 'restore', 'delete', 'resend'];
 
@@ -131,8 +128,10 @@ class participant_manager {
         }
         if ($typeid) {
             $categories = booking_manager::get_categories((int) $event->id);
-            if (isset($categories[$typeid]) && $categories[$typeid]->quota > 0 &&
-                    booking_manager::count_category_tickets($typeid) + $n > $categories[$typeid]->quota) {
+            if (
+                isset($categories[$typeid]) && $categories[$typeid]->quota > 0 &&
+                    booking_manager::count_category_tickets($typeid) + $n > $categories[$typeid]->quota
+            ) {
                 return get_string('quotareached', 'local_evenements', format_string($categories[$typeid]->name));
             }
         }
@@ -237,17 +236,29 @@ class participant_manager {
             $takesplace = $ticket->status !== booking_manager::TICKET_CANCELLED;
             if (!$force && $takesplace) {
                 // The ticket already takes a place: only the quota of the new category matters.
-                if (isset($newticket->tickettypeid) && isset($categories[$typeid]) && $categories[$typeid]->quota > 0 &&
-                        booking_manager::count_category_tickets($typeid) + 1 > $categories[$typeid]->quota) {
-                    throw new \moodle_exception('changeproblem', 'local_evenements', '',
-                        get_string('quotareached', 'local_evenements', format_string($categories[$typeid]->name)));
+                if (
+                    isset($newticket->tickettypeid) && isset($categories[$typeid]) && $categories[$typeid]->quota > 0 &&
+                        booking_manager::count_category_tickets($typeid) + 1 > $categories[$typeid]->quota
+                ) {
+                    throw new \moodle_exception(
+                        'changeproblem',
+                        'local_evenements',
+                        '',
+                        get_string('quotareached', 'local_evenements', format_string($categories[$typeid]->name))
+                    );
                 }
                 if (isset($newbooking->sessionid)) {
-                    $n = $DB->count_records_select('local_evenements_ticket', 'bookingid = ? AND status <> ?',
-                        [$booking->id, booking_manager::TICKET_CANCELLED]);
+                    $n = $DB->count_records_select(
+                        'local_evenements_ticket',
+                        'bookingid = ? AND status <> ?',
+                        [$booking->id, booking_manager::TICKET_CANCELLED]
+                    );
                     $left = booking_manager::session_remaining($sessions[$sessionid]);
                     if ($left !== null && $n > $left) {
-                        throw new \moodle_exception('changeproblem', 'local_evenements', '', get_string('sessionfull', 'local_evenements'));
+                        throw new \moodle_exception('changeproblem', 'local_evenements', '', get_string(
+                            'sessionfull',
+                            'local_evenements'
+                        ));
                     }
                 }
             }
@@ -260,8 +271,13 @@ class participant_manager {
         } finally {
             $lock->release();
         }
-        self::log((int) $event->id, (int) $booking->id, (int) $ticket->id, 'edit',
-            self::ticket_name($ticket) . "\n" . implode("\n", $changes));
+        self::log(
+            (int) $event->id,
+            (int) $booking->id,
+            (int) $ticket->id,
+            'edit',
+            self::ticket_name($ticket) . "\n" . implode("\n", $changes)
+        );
         return $changes;
     }
 
@@ -281,8 +297,11 @@ class participant_manager {
             return false;
         }
         $DB->set_field('local_evenements_ticket', 'status', booking_manager::TICKET_CANCELLED, ['id' => $ticket->id]);
-        $left = $DB->count_records_select('local_evenements_ticket', 'bookingid = ? AND status <> ?',
-            [$ticket->bookingid, booking_manager::TICKET_CANCELLED]);
+        $left = $DB->count_records_select(
+            'local_evenements_ticket',
+            'bookingid = ? AND status <> ?',
+            [$ticket->bookingid, booking_manager::TICKET_CANCELLED]
+        );
         if (!$left) {
             $DB->set_field('local_evenements_booking', 'status', 'cancelled', ['id' => $ticket->bookingid]);
             self::unlink_invitee((int) $ticket->bookingid);
@@ -335,11 +354,20 @@ class participant_manager {
                 $DB->set_field('local_evenements_booking', 'status', 'active', ['id' => $booking->id]);
             }
             // For a list event, the person of the list gets this booking back, unless they booked again meanwhile.
-            if (booking_manager::is_list_event($event) &&
-                    !$DB->record_exists('local_evenements_invitee', ['bookingid' => $booking->id])) {
+            if (
+                booking_manager::is_list_event($event) &&
+                    !$DB->record_exists('local_evenements_invitee', ['bookingid' => $booking->id])
+            ) {
                 $select = 'eventid = :e AND bookingid = 0 AND ' . $DB->sql_equal('email', ':email', false, false);
-                $invitees = $DB->get_records_select('local_evenements_invitee', $select,
-                    ['e' => $event->id, 'email' => $booking->email], 'id ASC', '*', 0, 1);
+                $invitees = $DB->get_records_select(
+                    'local_evenements_invitee',
+                    $select,
+                    ['e' => $event->id, 'email' => $booking->email],
+                    'id ASC',
+                    '*',
+                    0,
+                    1
+                );
                 if ($invitee = reset($invitees)) {
                     $DB->update_record('local_evenements_invitee', (object) ['id' => $invitee->id, 'bookingid' => $booking->id,
                         'timeconfirmed' => time()]);
@@ -375,13 +403,23 @@ class participant_manager {
             $DB->set_field('local_evenements_changelog', 'details', '', ['bookingid' => $bookingid]);
             self::unlink_invitee($bookingid);
             $DB->delete_records('local_evenements_booking', ['id' => $bookingid]);
-        } else if (!$DB->record_exists_select('local_evenements_ticket', 'bookingid = ? AND status <> ?',
-                [$bookingid, booking_manager::TICKET_CANCELLED])) {
+        } else if (
+            !$DB->record_exists_select(
+                'local_evenements_ticket',
+                'bookingid = ? AND status <> ?',
+                [$bookingid, booking_manager::TICKET_CANCELLED]
+            )
+        ) {
             $DB->set_field('local_evenements_booking', 'status', 'cancelled', ['id' => $bookingid]);
             self::unlink_invitee($bookingid);
         }
-        self::log((int) $event->id, $bookingid, (int) $ticket->id, 'delete',
-            get_string('logticketnumber', 'local_evenements', (int) $ticket->id));
+        self::log(
+            (int) $event->id,
+            $bookingid,
+            (int) $ticket->id,
+            'delete',
+            get_string('logticketnumber', 'local_evenements', (int) $ticket->id)
+        );
         $transaction->allow_commit();
         if ($tookplace && $notifywaitlist) {
             booking_manager::process_waitlist($event);
@@ -446,16 +484,23 @@ class participant_manager {
                 'note' => \core_text::substr(trim((string) ($data->note ?? '')), 0, 255), 'timecreated' => $now,
             ];
             $ticket->id = $DB->insert_record('local_evenements_ticket', $ticket);
-            $DB->execute("UPDATE {local_evenements_waitlist} SET status = :booked
+            $DB->execute(
+                "UPDATE {local_evenements_waitlist} SET status = :booked
                            WHERE eventid = :e AND status IN ('waiting', 'notified') AND " .
                 $DB->sql_equal('email', ':email', false, false),
-                ['booked' => 'booked', 'e' => $event->id, 'email' => $booking->email]);
+                ['booked' => 'booked', 'e' => $event->id, 'email' => $booking->email]
+            );
             $transaction->allow_commit();
         } finally {
             $lock->release();
         }
-        self::log((int) $event->id, (int) $booking->id, (int) $ticket->id, 'add',
-            self::ticket_name($ticket) . ($force ? "\n" . get_string('logforced', 'local_evenements') : ''));
+        self::log(
+            (int) $event->id,
+            (int) $booking->id,
+            (int) $ticket->id,
+            'add',
+            self::ticket_name($ticket) . ($force ? "\n" . get_string('logforced', 'local_evenements') : '')
+        );
         return $booking;
     }
 

@@ -28,7 +28,6 @@ require_once($CFG->libdir . '/formslib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class event_form extends \moodleform {
-
     /**
      * Options of the image file manager.
      *
@@ -54,8 +53,13 @@ class event_form extends \moodleform {
         $mform->setType('name', PARAM_TEXT);
         $mform->addRule('name', null, 'required', null, 'client');
 
-        $mform->addElement('editor', 'description_editor', get_string('eventdescription', 'local_evenements'),
-            null, ['maxfiles' => 0, 'noclean' => false]);
+        $mform->addElement(
+            'editor',
+            'description_editor',
+            get_string('eventdescription', 'local_evenements'),
+            null,
+            ['maxfiles' => 0, 'noclean' => false]
+        );
         $mform->setType('description_editor', PARAM_RAW);
 
         $mform->addElement('text', 'location', get_string('location', 'local_evenements'), ['size' => 60]);
@@ -107,8 +111,12 @@ class event_form extends \moodleform {
         $mform->setDefault('maxperperson', 0);
         $mform->addHelpButton('maxperperson', 'maxperperson', 'local_evenements');
 
-        $mform->addElement('textarea', 'categories', get_string('categories', 'local_evenements'),
-            ['rows' => 5, 'cols' => 50]);
+        $mform->addElement(
+            'textarea',
+            'categories',
+            get_string('categories', 'local_evenements'),
+            ['rows' => 5, 'cols' => 50]
+        );
         $mform->setType('categories', PARAM_TEXT);
         $mform->addHelpButton('categories', 'categories', 'local_evenements');
 
@@ -130,51 +138,47 @@ class event_form extends \moodleform {
         ]);
         $mform->addElement('text', 'tickettitle', get_string('tickettitle', 'local_evenements'), ['size' => 40]);
         $mform->setType('tickettitle', PARAM_TEXT);
-        $mform->addElement('textarea', 'tickettext', get_string('tickettext', 'local_evenements'),
-            ['rows' => 3, 'cols' => 50]);
+        $mform->addElement(
+            'textarea',
+            'tickettext',
+            get_string('tickettext', 'local_evenements'),
+            ['rows' => 3, 'cols' => 50]
+        );
         $mform->setType('tickettext', PARAM_TEXT);
-        $mform->addElement('filemanager', 'eventimage', get_string('eventimage', 'local_evenements'), null,
-            self::image_options());
+        $mform->addElement(
+            'filemanager',
+            'eventimage',
+            get_string('eventimage', 'local_evenements'),
+            null,
+            self::image_options()
+        );
 
-        $mform->addElement('filemanager', 'ticketlogo', get_string('ticketlogo', 'local_evenements'), null,
-            self::image_options());
+        $mform->addElement(
+            'filemanager',
+            'ticketlogo',
+            get_string('ticketlogo', 'local_evenements'),
+            null,
+            self::image_options()
+        );
         $mform->addHelpButton('ticketlogo', 'ticketlogo', 'local_evenements');
 
-        $mform->addElement('static', 'ticketpreview', get_string('ticketpreview', 'local_evenements'),
+        $mform->addElement(
+            'static',
+            'ticketpreview',
+            get_string('ticketpreview', 'local_evenements'),
             '<div id="evt-preview" class="evt-preview" aria-live="polite">' .
             '<div class="evt-pv-head"><span class="evt-pv-title"></span><span class="evt-pv-cat">' .
             get_string('ticketpreviewcat', 'local_evenements') . '</span></div>' .
             '<div class="evt-pv-body"><div class="evt-pv-name"></div><div class="evt-pv-where"></div>' .
             '<div class="evt-pv-guest">' . get_string('ticketpreviewguest', 'local_evenements') . '</div>' .
             '<div class="evt-pv-qr" aria-hidden="true"></div></div>' .
-            '<div class="evt-pv-foot"></div></div>');
+            '<div class="evt-pv-foot"></div></div>'
+        );
 
         global $PAGE;
-        $PAGE->requires->js_amd_inline("
-            (function() {
-                var q = function(id) { return document.getElementById(id); };
-                var box = q('evt-preview');
-                if (!box) { return; }
-                var update = function() {
-                    var color = (q('id_ticketcolor').value || '').trim();
-                    if (/^#[0-9a-fA-F]{6}$/.test(color)) { box.style.setProperty('--pv', color); }
-                    var fm = q('id_ticketformat');
-                    if (fm) { box.style.maxWidth = {compact: '400px', boarding: '470px', concert: '560px'}[fm.value]; }
-                    var f = q('id_ticketfont');
-                    if (f) { box.style.fontFamily = {sans: 'Arial, sans-serif', serif: 'Georgia, serif', mono: 'Courier New, monospace'}[f.value]; }
-                    box.querySelector('.evt-pv-title').textContent = q('id_tickettitle').value || '" .
-                        addslashes_js(get_string('ticketpreviewdefault', 'local_evenements')) . "';
-                    box.querySelector('.evt-pv-name').textContent = q('id_name').value || '';
-                    box.querySelector('.evt-pv-where').textContent = q('id_location').value || '';
-                    box.querySelector('.evt-pv-foot').textContent = q('id_tickettext').value || '';
-                };
-                ['id_ticketformat', 'id_ticketfont', 'id_ticketcolor', 'id_tickettitle', 'id_name', 'id_location', 'id_tickettext'].forEach(function(id) {
-                    var el = q(id);
-                    if (el) { el.addEventListener('input', update); el.addEventListener('change', update); }
-                });
-                update();
-            })();
-        ");
+        $PAGE->requires->js_call_amd('local_evenements/ticket_preview', 'init', [
+            get_string('ticketpreviewdefault', 'local_evenements'),
+        ]);
 
         $this->add_action_buttons();
     }

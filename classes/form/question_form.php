@@ -28,7 +28,6 @@ require_once($CFG->libdir . '/formslib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class question_form extends \moodleform {
-
     /**
      * Form definition.
      */
@@ -62,8 +61,12 @@ class question_form extends \moodleform {
             'multichoice' => get_string('type_multichoice', 'local_evenements'),
         ]);
 
-        $mform->addElement('textarea', 'options', get_string('questionoptions', 'local_evenements'),
-            ['rows' => 5, 'cols' => 50]);
+        $mform->addElement(
+            'textarea',
+            'options',
+            get_string('questionoptions', 'local_evenements'),
+            ['rows' => 5, 'cols' => 50]
+        );
         $mform->setType('options', PARAM_TEXT);
         $mform->addHelpButton('options', 'questionoptions', 'local_evenements');
         $mform->hideIf('options', 'type', 'in', ['text', 'longtext']);

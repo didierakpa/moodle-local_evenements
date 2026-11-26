@@ -18,8 +18,6 @@ namespace local_evenements\form;
 
 use local_evenements\booking_manager;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Builds and checks the form element of a question (shared by the booking form and the survey).
  *
@@ -28,7 +26,6 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class question_elements {
-
     /**
      * Add the element that matches the type of the question.
      *
@@ -50,8 +47,13 @@ class question_elements {
                 $mform->setType($name, PARAM_TEXT);
                 break;
             case 'multichoice':
-                $mform->addElement('select', $name, $label, $options,
-                    ['multiple' => 'multiple', 'size' => max(2, min(6, count($options)))]);
+                $mform->addElement(
+                    'select',
+                    $name,
+                    $label,
+                    $options,
+                    ['multiple' => 'multiple', 'size' => max(2, min(6, count($options)))]
+                );
                 $mform->setType($name, PARAM_TEXT);
                 break;
             default:

@@ -31,7 +31,6 @@ require_once($CFG->libdir . '/pdflib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class badge_pdf {
-
     /** @var array Badge sizes in millimetres: format => [width, height, columns, rows]. */
     public const FORMATS = [
         'a6' => [105, 148, 2, 2],
@@ -184,8 +183,17 @@ class badge_pdf {
      * @param float $h
      * @param string $format
      */
-    private static function draw(\pdf $pdf, string $font, array $color, ?string $logo, \stdClass $event, array $person,
-            float $w, float $h, string $format): void {
+    private static function draw(
+        \pdf $pdf,
+        string $font,
+        array $color,
+        ?string $logo,
+        \stdClass $event,
+        array $person,
+        float $w,
+        float $h,
+        string $format
+    ): void {
         $big = $format === 'a6';
         $topband = $big ? 34 : 15;
         $botband = $big ? 26 : 13;
@@ -203,8 +211,23 @@ class badge_pdf {
         $pdf->MultiCell($textw, 0, $name, 0, 'L', false, 1, '', '', true, 0, false, true, $topband - ($big ? 14 : 6), 'T');
         if ($logo) {
             $ls = $big ? 18 : 10;
-            $pdf->Image('@' . $logo, $w - $pad - $ls, ($topband - $ls) / 2 + ($big ? 3 : 0), $ls, $ls, '', '', '', false, 300,
-                '', false, false, 0, 'RM');
+            $pdf->Image(
+                '@' . $logo,
+                $w - $pad - $ls,
+                ($topband - $ls) / 2 + ($big ? 3 : 0),
+                $ls,
+                $ls,
+                '',
+                '',
+                '',
+                false,
+                300,
+                '',
+                false,
+                false,
+                0,
+                'RM'
+            );
         }
         if ($big) {
             $pdf->SetDrawColor(255, 255, 255);
@@ -245,8 +268,16 @@ class badge_pdf {
             $qr = 30;
             $style = ['border' => 0, 'vpadding' => 'auto', 'hpadding' => 'auto', 'fgcolor' => [0, 0, 0], 'bgcolor' => false,
                 'module_width' => 1, 'module_height' => 1];
-            $pdf->write2DBarcode(booking_manager::ticket_scan_url($person['ticket'])->out(false), 'QRCODE,M',
-                ($w - $qr) / 2, $h - $botband - $qr - 3, $qr, $qr, $style, 'N');
+            $pdf->write2DBarcode(
+                booking_manager::ticket_scan_url($person['ticket'])->out(false),
+                'QRCODE,M',
+                ($w - $qr) / 2,
+                $h - $botband - $qr - 3,
+                $qr,
+                $qr,
+                $style,
+                'N'
+            );
         }
 
         // Bottom band: the role.

@@ -18,8 +18,6 @@ namespace local_evenements\task;
 
 use local_evenements\booking_manager;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Deletes the personal data of events that ended a while ago (GDPR).
  *
@@ -28,7 +26,6 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class purge_data extends \core\task\scheduled_task {
-
     /**
      * Task name.
      *

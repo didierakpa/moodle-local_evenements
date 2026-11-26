@@ -53,8 +53,12 @@ if ($mform->is_cancelled()) {
     redirect($manageurl);
 } else if ($data = $mform->get_data()) {
     $sent = booking_manager::send_group_message($event, trim($data->subject), trim($data->body));
-    redirect($manageurl, get_string('messagesent', 'local_evenements', $sent), null,
-        \core\output\notification::NOTIFY_SUCCESS);
+    redirect(
+        $manageurl,
+        get_string('messagesent', 'local_evenements', $sent),
+        null,
+        \core\output\notification::NOTIFY_SUCCESS
+    );
 }
 
 echo $OUTPUT->header();

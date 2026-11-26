@@ -47,13 +47,22 @@ if ($action === 'add' && confirm_sesskey()) {
     $login = trim(optional_param('who', '', PARAM_RAW));
     $user = false;
     if ($login !== '') {
-        $user = $DB->get_record_select('user', "deleted = 0 AND suspended = 0 AND mnethostid = :h AND (" .
+        $user = $DB->get_record_select(
+            'user',
+            "deleted = 0 AND suspended = 0 AND mnethostid = :h AND (" .
             $DB->sql_equal('email', ':e', false, false) . " OR " . $DB->sql_equal('username', ':u', false, false) . ")",
-            ['h' => $CFG->mnet_localhost_id, 'e' => $login, 'u' => $login], '*', IGNORE_MULTIPLE);
+            ['h' => $CFG->mnet_localhost_id, 'e' => $login, 'u' => $login],
+            '*',
+            IGNORE_MULTIPLE
+        );
     }
     if (!$user) {
-        redirect($PAGE->url, get_string('organiserusernotfound', 'local_evenements'), null,
-            \core\output\notification::NOTIFY_ERROR);
+        redirect(
+            $PAGE->url,
+            get_string('organiserusernotfound', 'local_evenements'),
+            null,
+            \core\output\notification::NOTIFY_ERROR
+        );
     }
     if (!booking_manager::is_organiser($id, (int) $user->id)) {
         $DB->insert_record('local_evenements_organiser', (object) ['eventid' => $id, 'userid' => $user->id,
@@ -75,10 +84,16 @@ $users = $DB->get_records_sql("SELECT u.*, o.timecreated AS since FROM {local_ev
 if ($users) {
     $rows = '';
     foreach ($users as $u) {
-        $rows .= html_writer::tag('tr',
+        $rows .= html_writer::tag(
+            'tr',
             html_writer::tag('td', s(fullname($u))) . html_writer::tag('td', s($u->email)) .
-            html_writer::tag('td', html_writer::link(new moodle_url($PAGE->url, ['action' => 'remove', 'u' => $u->id,
-                'sesskey' => sesskey()]), get_string('remove', 'local_evenements'), ['class' => 'btn btn-sm btn-outline-danger'])));
+            html_writer::tag('td', html_writer::link(
+                new moodle_url($PAGE->url, ['action' => 'remove', 'u' => $u->id,
+                'sesskey' => sesskey()]),
+                get_string('remove', 'local_evenements'),
+                ['class' => 'btn btn-sm btn-outline-danger']
+            ))
+        );
     }
     echo html_writer::tag('table', html_writer::tag('tbody', $rows), ['class' => 'evt-table mb-4']);
 } else {
@@ -89,8 +104,10 @@ echo html_writer::start_tag('form', ['method' => 'post', 'action' => $PAGE->url-
 echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
 echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'action', 'value' => 'add']);
 echo html_writer::tag('label', get_string('organiserwho', 'local_evenements'), ['for' => 'evt-who', 'class' => 'form-label']);
-echo html_writer::div(html_writer::empty_tag('input', ['type' => 'text', 'name' => 'who', 'id' => 'evt-who', 'required' => 'required',
+echo html_writer::div(
+    html_writer::empty_tag('input', ['type' => 'text', 'name' => 'who', 'id' => 'evt-who', 'required' => 'required',
     'class' => 'form-control']) . html_writer::tag('button', get_string('add'), ['type' => 'submit', 'class' => 'btn btn-primary']),
-    'input-group');
+    'input-group'
+);
 echo html_writer::end_tag('form');
 echo $OUTPUT->footer();

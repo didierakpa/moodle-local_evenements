@@ -30,7 +30,6 @@ require_once($CFG->libdir . '/formslib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class booking_form extends \moodleform {
-
     /**
      * Form definition.
      */
@@ -146,8 +145,10 @@ class booking_form extends \moodleform {
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
 
-        if (!empty($data['email']) && !empty($data['email2']) &&
-                \core_text::strtolower($data['email']) !== \core_text::strtolower($data['email2'])) {
+        if (
+            !empty($data['email']) && !empty($data['email2']) &&
+                \core_text::strtolower($data['email']) !== \core_text::strtolower($data['email2'])
+        ) {
             $errors['email2'] = get_string('emailmismatch', 'local_evenements');
         }
         if (empty($data['consent'])) {
@@ -159,8 +160,11 @@ class booking_form extends \moodleform {
         if (!empty($data['email']) && !empty($event->maxperperson)) {
             $left = \local_evenements\booking_manager::person_remaining($event, trim($data['email']));
             if ($left !== null && $n > $left) {
-                $errors['email'] = get_string('personlimit', 'local_evenements',
-                    (object) ['max' => (int) $event->maxperperson, 'left' => $left]);
+                $errors['email'] = get_string(
+                    'personlimit',
+                    'local_evenements',
+                    (object) ['max' => (int) $event->maxperperson, 'left' => $left]
+                );
             }
         }
         $sessions = $this->_customdata['sessions'] ?? [];

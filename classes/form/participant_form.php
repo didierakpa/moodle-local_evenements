@@ -30,7 +30,6 @@ require_once($CFG->libdir . '/formslib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class participant_form extends \moodleform {
-
     /**
      * Form definition.
      */
@@ -68,13 +67,17 @@ class participant_form extends \moodleform {
         $mform->setType('tickettypeid', PARAM_INT);
         $mform->addElement('text', 'note', get_string('participantnote', 'local_evenements'), ['size' => 40, 'maxlength' => 255]);
         $mform->setType('note', PARAM_TEXT);
-        $mform->addElement('static', 'notehelp', '', \html_writer::span(get_string('participantnote_help', 'local_evenements'),
-            'text-muted small'));
+        $mform->addElement('static', 'notehelp', '', \html_writer::span(
+            get_string('participantnote_help', 'local_evenements'),
+            'text-muted small'
+        ));
 
         $mform->addElement('header', 'bookinghdr', get_string('participantbooking', 'local_evenements'));
         if ($others > 0) {
             $mform->addElement('static', 'sharedhelp', '', \html_writer::div(
-                get_string('participantshared', 'local_evenements', $others), 'alert alert-info py-2 mb-0'));
+                get_string('participantshared', 'local_evenements', $others),
+                'alert alert-info py-2 mb-0'
+            ));
         }
         $sessions = booking_manager::get_sessions((int) $event->id);
         if ($sessions) {
@@ -87,25 +90,41 @@ class participant_form extends \moodleform {
             $mform->addElement('hidden', 'sessionid', 0);
         }
         $mform->setType('sessionid', PARAM_INT);
-        $mform->addElement('text', 'contactname', get_string('participantcontactname', 'local_evenements'), ['size' => 40, 'maxlength' => 255]);
+        $mform->addElement('text', 'contactname', get_string('participantcontactname', 'local_evenements'), ['size' => 40,
+            'maxlength' => 255]);
         $mform->setType('contactname', PARAM_TEXT);
-        $mform->addElement('text', 'contactemail', get_string('participantcontactemail', 'local_evenements'), ['size' => 40, 'maxlength' => 255]);
+        $mform->addElement('text', 'contactemail', get_string('participantcontactemail', 'local_evenements'), ['size' => 40,
+            'maxlength' => 255]);
         $mform->setType('contactemail', PARAM_RAW_TRIMMED);
         if ($isnew) {
-            $mform->addElement('static', 'contacthelp', '', \html_writer::span(get_string('participantcontact_help', 'local_evenements'),
-                'text-muted small'));
+            $mform->addElement('static', 'contacthelp', '', \html_writer::span(
+                get_string('participantcontact_help', 'local_evenements'),
+                'text-muted small'
+            ));
         } else {
             $mform->addRule('contactname', null, 'required', null, 'client');
         }
 
         $mform->addElement('header', 'optionshdr', get_string('participantoptions', 'local_evenements'));
         $mform->setExpanded('optionshdr', true);
-        $mform->addElement('advcheckbox', 'sendticket', '', get_string($isnew ? 'participantsend' : 'participantresend',
-            'local_evenements'));
+        $mform->addElement('advcheckbox', 'sendticket', '', get_string(
+            $isnew ? 'participantsend' : 'participantresend',
+            'local_evenements'
+        ));
         $mform->setDefault('sendticket', $isnew ? 1 : 0);
         $mform->addElement('advcheckbox', 'force', '', get_string('participantforce', 'local_evenements'));
 
-        $this->add_action_buttons(true, get_string($isnew ? 'participantadd' : 'savechanges', $isnew ? 'local_evenements' : 'moodle'));
+        if ($isnew) {
+            $buttons = [
+                $mform->createElement('submit', 'submitbutton', get_string('participantadd', 'local_evenements')),
+                $mform->createElement('submit', 'addanother', get_string('participantaddanother', 'local_evenements')),
+                $mform->createElement('cancel'),
+            ];
+            $mform->addGroup($buttons, 'buttonar', '', ' ', false);
+            $mform->closeHeaderBefore('buttonar');
+        } else {
+            $this->add_action_buttons(true, get_string('savechanges'));
+        }
     }
 
     /**
@@ -122,8 +141,10 @@ class participant_form extends \moodleform {
                 $errors[$field] = get_string('invalidemail');
             }
         }
-        if (!empty($data['sendticket']) && trim((string) ($data['contactemail'] ?? '')) === '' &&
-                trim((string) ($data['email'] ?? '')) === '') {
+        if (
+            !empty($data['sendticket']) && trim((string) ($data['contactemail'] ?? '')) === '' &&
+                trim((string) ($data['email'] ?? '')) === ''
+        ) {
             $errors['sendticket'] = get_string('participantnoemail', 'local_evenements');
         }
         return $errors;

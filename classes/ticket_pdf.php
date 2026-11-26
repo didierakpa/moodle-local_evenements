@@ -31,9 +31,9 @@ require_once($CFG->libdir . '/pdflib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class ticket_pdf {
-
-    /** @var int Page size in millimetres. */
+    /** @var int Page width of the default format, in millimetres. */
     private const WIDTH = 210;
+    /** @var int Page height of the default format, in millimetres. */
     private const HEIGHT = 90;
 
     /**
@@ -42,6 +42,7 @@ class ticket_pdf {
      * @param \stdClass $event
      * @param \stdClass $booking
      * @param \stdClass[] $tickets Tickets to print
+     * @param bool $sheet All the tickets on A4 pages instead of one page per ticket
      * @return string The PDF content
      */
     public static function generate(\stdClass $event, \stdClass $booking, array $tickets, bool $sheet = false): string {
@@ -121,8 +122,15 @@ class ticket_pdf {
      * @param \stdClass[] $categories
      * @param string|null $logo
      */
-    private static function draw_boarding(\pdf $pdf, string $font, array $color, \stdClass $event, \stdClass $ticket,
-            array $categories, ?string $logo): void {
+    private static function draw_boarding(
+        \pdf $pdf,
+        string $font,
+        array $color,
+        \stdClass $event,
+        \stdClass $ticket,
+        array $categories,
+        ?string $logo
+    ): void {
         $w = 175;
         $h = 74;
         $cut = 128;
@@ -167,9 +175,11 @@ class ticket_pdf {
         $cols = self::when_columns($event);
         $x = 7;
         $widths = [38, 28, $cut - 14 - 66];
-        foreach ([[get_string('ticketcoldate', 'local_evenements'), $cols[0]],
+        foreach (
+            [[get_string('ticketcoldate', 'local_evenements'), $cols[0]],
                 [get_string('ticketcoltime', 'local_evenements'), $cols[1]],
-                [get_string('ticketcolplace', 'local_evenements'), $cols[2]]] as $i => [$label, $value]) {
+                [get_string('ticketcolplace', 'local_evenements'), $cols[2]]] as $i => [$label, $value]
+        ) {
             $pdf->SetTextColor(125, 125, 125);
             $pdf->SetFont($font, '', 7);
             $pdf->SetXY($x, 50);
@@ -220,8 +230,15 @@ class ticket_pdf {
      * @param \stdClass[] $categories
      * @param string|null $logo
      */
-    private static function draw_compact(\pdf $pdf, string $font, array $color, \stdClass $event, \stdClass $ticket,
-            array $categories, ?string $logo): void {
+    private static function draw_compact(
+        \pdf $pdf,
+        string $font,
+        array $color,
+        \stdClass $event,
+        \stdClass $ticket,
+        array $categories,
+        ?string $logo
+    ): void {
         $w = 148;
         $h = 68;
         $cut = 108;
@@ -245,9 +262,11 @@ class ticket_pdf {
         $cols = self::when_columns($event);
         $x = 6;
         $widths = [36, 24, $cut - 12 - 60];
-        foreach ([[get_string('ticketcoldate', 'local_evenements'), $cols[0]],
+        foreach (
+            [[get_string('ticketcoldate', 'local_evenements'), $cols[0]],
                 [get_string('ticketcoltime', 'local_evenements'), $cols[1]],
-                [get_string('ticketcolplace', 'local_evenements'), $cols[2]]] as $i => [$label, $value]) {
+                [get_string('ticketcolplace', 'local_evenements'), $cols[2]]] as $i => [$label, $value]
+        ) {
             $pdf->SetTextColor(125, 125, 125);
             $pdf->SetFont($font, '', 6.8);
             $pdf->SetXY($x, 23.5);
@@ -361,9 +380,18 @@ class ticket_pdf {
      * @param \stdClass $event
      * @param \stdClass $ticket
      * @param \stdClass[] $categories
+     * @param string|null $logo Logo image data
      */
-    private static function draw_ticket(\pdf $pdf, string $font, array $color, ?string $imagedata,
-            \stdClass $event, \stdClass $ticket, array $categories, ?string $logo = null): void {
+    private static function draw_ticket(
+        \pdf $pdf,
+        string $font,
+        array $color,
+        ?string $imagedata,
+        \stdClass $event,
+        \stdClass $ticket,
+        array $categories,
+        ?string $logo = null
+    ): void {
 
         $perforation = 155;
 
@@ -527,8 +555,14 @@ class ticket_pdf {
      */
     public static function get_area_image(\stdClass $event, string $filearea): ?string {
         $fs = get_file_storage();
-        $files = $fs->get_area_files(\context_system::instance()->id, 'local_evenements', $filearea,
-            $event->id, 'sortorder, id', false);
+        $files = $fs->get_area_files(
+            \context_system::instance()->id,
+            'local_evenements',
+            $filearea,
+            $event->id,
+            'sortorder, id',
+            false
+        );
         foreach ($files as $file) {
             if ($file->is_valid_image()) {
                 return $file->get_content();

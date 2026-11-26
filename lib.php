@@ -22,8 +22,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Serve the event illustrations. Published events are public.
  *
@@ -36,8 +34,15 @@ defined('MOODLE_INTERNAL') || die();
  * @param array $options
  * @return bool|void
  */
-function local_evenements_pluginfile($course, $cm, $context, string $filearea, array $args,
-        bool $forcedownload, array $options = []) {
+function local_evenements_pluginfile(
+    $course,
+    $cm,
+    $context,
+    string $filearea,
+    array $args,
+    bool $forcedownload,
+    array $options = []
+) {
     global $DB;
 
     if ($context->contextlevel != CONTEXT_SYSTEM || $filearea !== 'eventimage') {

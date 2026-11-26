@@ -22,6 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+// Public page: visitors and guests use it without a Moodle account (access by personal link or token).
+// phpcs:ignore moodle.Files.RequireLogin.Missing
 require_once(__DIR__ . '/../../config.php');
 
 use local_evenements\booking_manager;
@@ -53,11 +55,19 @@ if (booking_manager::waitlist_available($event)) {
         }
         $uid = (isloggedin() && !isguestuser()) ? (int) $USER->id : 0;
         try {
-            $entry = booking_manager::join_waitlist($event, trim($wdata->contactname), trim($wdata->email),
-                $uid, (int) $wdata->quantity);
-            redirect(new moodle_url('/local/evenements/waitlist.php', ['w' => $entry->token]),
-                get_string('waitlistjoined', 'local_evenements'), null,
-                \core\output\notification::NOTIFY_SUCCESS);
+            $entry = booking_manager::join_waitlist(
+                $event,
+                trim($wdata->contactname),
+                trim($wdata->email),
+                $uid,
+                (int) $wdata->quantity
+            );
+            redirect(
+                new moodle_url('/local/evenements/waitlist.php', ['w' => $entry->token]),
+                get_string('waitlistjoined', 'local_evenements'),
+                null,
+                \core\output\notification::NOTIFY_SUCCESS
+            );
         } catch (moodle_exception $e) {
             $waiterror = $e->getMessage();
         }
@@ -114,7 +124,9 @@ if (!booking_manager::is_open($event)) {
 } else if (booking_manager::is_list_event($event)) {
     echo html_writer::tag('h2', get_string('accesstitle', 'local_evenements'));
     echo html_writer::tag('p', get_string('accessintro', 'local_evenements'), ['class' => 'evt-note']);
-    echo html_writer::start_tag('form', ['method' => 'post', 'action' => (new moodle_url('/local/evenements/access.php'))->out(false), 'class' => 'evt-accessform']);
+    echo html_writer::start_tag('form', ['method' => 'post', 'action' => (new moodle_url('/local/evenements/access.php'))->out(
+        false
+    ), 'class' => 'evt-accessform']);
     echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'id', 'value' => $event->id]);
     echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
     echo html_writer::div(html_writer::tag('label', get_string('firstname'), ['for' => 'evt-af']) .
@@ -125,7 +137,8 @@ if (!booking_manager::is_open($event)) {
             'class' => 'form-control', 'autocomplete' => 'family-name']), 'mb-2');
     echo html_writer::div(html_writer::empty_tag('input', ['type' => 'text', 'name' => 'website', 'tabindex' => '-1',
         'autocomplete' => 'off']), 'evt-hp', ['aria-hidden' => 'true']);
-    echo html_writer::tag('button', get_string('accessbutton', 'local_evenements'), ['type' => 'submit', 'class' => 'btn btn-primary w-100']);
+    echo html_writer::tag('button', get_string('accessbutton', 'local_evenements'), ['type' => 'submit',
+        'class' => 'btn btn-primary w-100']);
     echo html_writer::end_tag('form');
 } else if ($remaining === 0) {
     if ($waitform) {
@@ -149,14 +162,19 @@ if (!booking_manager::is_open($event)) {
     }
     echo html_writer::tag('h2', get_string('chooseqty', 'local_evenements'));
     if ($max < 1) {
-        echo $OUTPUT->notification(get_string('personlimitreached', 'local_evenements'),
-            \core\output\notification::NOTIFY_WARNING);
+        echo $OUTPUT->notification(
+            get_string('personlimitreached', 'local_evenements'),
+            \core\output\notification::NOTIFY_WARNING
+        );
     } else {
         echo html_writer::start_div('evt-qty');
         for ($i = 1; $i <= $max; $i++) {
             $url = new moodle_url('/local/evenements/book.php', ['id' => $event->id, 'n' => $i]);
-            echo html_writer::link($url, $i . html_writer::tag('small', get_string('ticketword', 'local_evenements', $i)),
-                ['aria-label' => get_string('ticketsn', 'local_evenements', $i)]);
+            echo html_writer::link(
+                $url,
+                $i . html_writer::tag('small', get_string('ticketword', 'local_evenements', $i)),
+                ['aria-label' => get_string('ticketsn', 'local_evenements', $i)]
+            );
         }
         echo html_writer::end_div();
     }
@@ -174,7 +192,9 @@ if (!booking_manager::is_open($event)) {
 echo html_writer::end_div();
 echo html_writer::end_div();
 
-echo html_writer::div(html_writer::link(new moodle_url('/local/evenements/index.php'),
-    get_string('backtoevents', 'local_evenements')), 'mt-4');
+echo html_writer::div(html_writer::link(
+    new moodle_url('/local/evenements/index.php'),
+    get_string('backtoevents', 'local_evenements')
+), 'mt-4');
 
 echo $OUTPUT->footer();

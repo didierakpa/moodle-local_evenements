@@ -22,6 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+// Public page: visitors and guests use it without a Moodle account (access by personal link or token).
+// phpcs:ignore moodle.Files.RequireLogin.Missing
 require_once(__DIR__ . '/../../config.php');
 
 use local_evenements\booking_manager;
@@ -54,8 +56,12 @@ if ($questions && $booking->status === 'active' && time() >= $event->timestart) 
             $answers[$question->id] = booking_manager::clean_answer($question, $data->{'q_' . $question->id} ?? '');
         }
         booking_manager::save_survey($booking, $answers);
-        redirect($ticketurl, get_string('surveythanks', 'local_evenements'), null,
-            \core\output\notification::NOTIFY_SUCCESS);
+        redirect(
+            $ticketurl,
+            get_string('surveythanks', 'local_evenements'),
+            null,
+            \core\output\notification::NOTIFY_SUCCESS
+        );
     }
 }
 
@@ -70,8 +76,10 @@ if (!$questions) {
     exit;
 }
 if ($booking->status !== 'active') {
-    echo $OUTPUT->notification(get_string('bookingiscancelled', 'local_evenements'),
-        \core\output\notification::NOTIFY_WARNING);
+    echo $OUTPUT->notification(
+        get_string('bookingiscancelled', 'local_evenements'),
+        \core\output\notification::NOTIFY_WARNING
+    );
     echo $OUTPUT->footer();
     exit;
 }

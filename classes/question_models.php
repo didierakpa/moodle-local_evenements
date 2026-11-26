@@ -16,8 +16,6 @@
 
 namespace local_evenements;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Ready-made questionnaires (before and after the event) that can be added to any event in one click.
  *
@@ -28,7 +26,6 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class question_models {
-
     /**
      * Models: key => [moment, icon, questions[[type, scope, required]]].
      * Types: text, longtext, choice, multichoice.
@@ -40,7 +37,8 @@ class question_models {
         'travel' => ['before', 'car', [['choice', 'booking', 0], ['choice', 'booking', 0]]],
         'partner' => ['before', 'handshake', [['text', 'booking', 1], ['text', 'booking', 0], ['choice', 'booking', 0]]],
         'guestinfo' => ['before', 'user-tag', [['choice', 'guest', 0], ['text', 'guest', 0]]],
-        'satisfaction' => ['after', 'face-smile', [['choice', 'booking', 1], ['choice', 'booking', 0], ['longtext', 'booking', 0], ['longtext', 'booking', 0]]],
+        'satisfaction' => ['after', 'face-smile', [['choice', 'booking', 1], ['choice', 'booking', 0], ['longtext', 'booking', 0],
+            ['longtext', 'booking', 0]]],
         'orientation' => ['after', 'compass', [['choice', 'booking', 0], ['text', 'booking', 0], ['choice', 'booking', 0]]],
         'ceremony' => ['after', 'award', [['choice', 'booking', 0], ['longtext', 'booking', 0]]],
         'nextyear' => ['after', 'calendar-plus', [['choice', 'booking', 0], ['longtext', 'booking', 0]]],
@@ -71,7 +69,10 @@ class question_models {
                 'type' => $type,
                 'scope' => $scope,
                 'required' => $required,
-                'options' => in_array($type, ['choice', 'multichoice'], true) ? get_string("qm_{$key}_q{$n}opts", 'local_evenements') : '',
+                'options' => in_array($type, ['choice', 'multichoice'], true) ? get_string(
+                    "qm_{$key}_q{$n}opts",
+                    'local_evenements'
+                ) : '',
             ];
         }
         return $out;
@@ -93,7 +94,9 @@ class question_models {
         $order = (int) $DB->get_field_sql('SELECT MAX(sortorder) FROM {local_evenements_question} WHERE eventid = ?', [$eventid]);
         $added = 0;
         foreach (self::questions($key) as $q) {
-            if ($DB->record_exists('local_evenements_question', ['eventid' => $eventid, 'moment' => $moment, 'name' => $q['name']])) {
+            if (
+                $DB->record_exists('local_evenements_question', ['eventid' => $eventid, 'moment' => $moment, 'name' => $q['name']])
+            ) {
                 continue;
             }
             $DB->insert_record('local_evenements_question', (object) [

@@ -74,7 +74,8 @@ if ($action === 'bulk' && $canedit) {
     if ($what === 'delete' && !optional_param('confirm', 0, PARAM_BOOL)) {
         echo $OUTPUT->header();
         echo ui::event_header($event, 'registrations');
-        $confirm = new moodle_url($PAGE->url, ['action' => 'bulk', 'bulkaction' => 'delete', 'confirm' => 1, 'sesskey' => sesskey()]);
+        $confirm = new moodle_url($PAGE->url, ['action' => 'bulk', 'bulkaction' => 'delete', 'confirm' => 1, 'sesskey' => sesskey(
+        )]);
         foreach (array_values($ids) as $n => $ticketid) {
             $confirm->param('tickets[' . $n . ']', (int) $ticketid);
         }
@@ -126,8 +127,12 @@ $sql = "SELECT t.id, t.bookingid, t.firstname, t.lastname, t.email, t.status, t.
 $rows = $DB->get_records_sql($sql, $sqlparams);
 
 $counts = ['all' => 0, 'valid' => 0, 'used' => 0, 'cancelled' => 0];
-foreach ($DB->get_records_sql("SELECT status, COUNT(id) AS n FROM {local_evenements_ticket} WHERE eventid = ? GROUP BY status",
-        [$id]) as $count) {
+foreach (
+    $DB->get_records_sql(
+        "SELECT status, COUNT(id) AS n FROM {local_evenements_ticket} WHERE eventid = ? GROUP BY status",
+        [$id]
+    ) as $count
+) {
     $counts[$count->status] = (int) $count->n;
     $counts['all'] += (int) $count->n;
 }
@@ -135,25 +140,43 @@ $total = $counts['valid'] + $counts['used'];
 
 echo $OUTPUT->header();
 echo ui::event_header($event, 'registrations');
-echo html_writer::tag('p', get_string('registrationssummary', 'local_evenements',
-    (object) ['total' => $total, 'used' => $counts['used']]), ['class' => 'evt-note']);
+echo html_writer::tag('p', get_string(
+    'registrationssummary',
+    'local_evenements',
+    (object) ['total' => $total, 'used' => $counts['used']]
+), ['class' => 'evt-note']);
 
 // Toolbar.
 $buttons = '';
 if ($canedit) {
-    $buttons .= html_writer::link(new moodle_url('/local/evenements/participant.php', ['id' => $id]),
+    $buttons .= html_writer::link(
+        new moodle_url('/local/evenements/participant.php', ['id' => $id]),
         html_writer::tag('i', '', ['class' => 'fa-solid fa-user-plus me-1', 'aria-hidden' => 'true']) .
-        get_string('participantadd', 'local_evenements'), ['class' => 'btn btn-primary me-2']);
+        get_string('participantadd', 'local_evenements'),
+        ['class' => 'btn btn-primary me-2']
+    );
 }
-$buttons .= html_writer::link(new moodle_url('/local/evenements/export.php', ['id' => $id]),
-        get_string('exportcsv', 'local_evenements'), ['class' => 'btn btn-secondary me-2']) .
-    html_writer::link(new moodle_url('/local/evenements/print.php', ['id' => $id]),
-        get_string('printsheet', 'local_evenements'), ['class' => 'btn btn-secondary me-2', 'target' => '_blank']);
+$buttons .= html_writer::link(
+    new moodle_url('/local/evenements/export.php', ['id' => $id]),
+    get_string('exportcsv', 'local_evenements'),
+    ['class' => 'btn btn-secondary me-2']
+) .
+    html_writer::link(
+        new moodle_url('/local/evenements/print.php', ['id' => $id]),
+        get_string('printsheet', 'local_evenements'),
+        ['class' => 'btn btn-secondary me-2', 'target' => '_blank']
+    );
 if ($canedit) {
-    $buttons .= html_writer::link(new moodle_url('/local/evenements/moodleimport.php', ['id' => $id]),
-        get_string('mimportmenu', 'local_evenements'), ['class' => 'btn btn-secondary me-2']);
-    $buttons .= html_writer::link(new moodle_url('/local/evenements/import.php', ['id' => $id]),
-        get_string('importguests', 'local_evenements'), ['class' => 'btn btn-secondary me-2']);
+    $buttons .= html_writer::link(
+        new moodle_url('/local/evenements/moodleimport.php', ['id' => $id]),
+        get_string('mimportmenu', 'local_evenements'),
+        ['class' => 'btn btn-secondary me-2']
+    );
+    $buttons .= html_writer::link(
+        new moodle_url('/local/evenements/import.php', ['id' => $id]),
+        get_string('importguests', 'local_evenements'),
+        ['class' => 'btn btn-secondary me-2']
+    );
 }
 echo html_writer::div($buttons, 'mb-3 evt-toolbar');
 
@@ -161,35 +184,50 @@ echo html_writer::div($buttons, 'mb-3 evt-toolbar');
 $chips = '';
 foreach (['' => 'all', 'active' => null, 'valid' => 'valid', 'used' => 'used', 'cancelled' => 'cancelled'] as $key => $countkey) {
     $label = $key === '' ? get_string('filterall', 'local_evenements') :
-        ($key === 'active' ? get_string('filteractive', 'local_evenements') : get_string('ticketstatus_' . $key, 'local_evenements'));
+        ($key === 'active' ? get_string('filteractive', 'local_evenements') : get_string(
+            'ticketstatus_' . $key,
+            'local_evenements'
+        ));
     $n = $countkey ? $counts[$countkey] : $total;
     $url = new moodle_url($PAGE->url, ['st' => $key]);
     if ($key === '') {
         $url->remove_params('st');
     }
-    $chips .= html_writer::link($url, s($label) . ' ' . html_writer::span($n, 'evt-chip-n'),
-        ['class' => 'evt-chip' . ($filter === $key ? ' is-active' : '')]);
+    $chips .= html_writer::link(
+        $url,
+        s($label) . ' ' . html_writer::span($n, 'evt-chip-n'),
+        ['class' => 'evt-chip' . ($filter === $key ? ' is-active' : '')]
+    );
 }
 $form = html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'id', 'value' => $id]);
 if ($filter !== '') {
     $form .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'st', 'value' => $filter]);
 }
-$form .= html_writer::empty_tag('input', ['type' => 'search', 'name' => 'q', 'value' => $search, 'class' => 'form-control form-control-sm',
-    'placeholder' => get_string('participantsearch', 'local_evenements'), 'aria-label' => get_string('participantsearch', 'local_evenements')]);
+$form .= html_writer::empty_tag('input', ['type' => 'search', 'name' => 'q', 'value' => $search,
+    'class' => 'form-control form-control-sm',
+    'placeholder' => get_string('participantsearch', 'local_evenements'), 'aria-label' => get_string(
+        'participantsearch',
+        'local_evenements'
+    )]);
 if (count($categories) > 1) {
     $options = html_writer::tag('option', get_string('allcategories', 'local_evenements'), ['value' => 0]);
     foreach ($categories as $category) {
-        $options .= html_writer::tag('option', format_string($category->name),
-            ['value' => $category->id] + ((int) $category->id === $typefilter ? ['selected' => 'selected'] : []));
+        $options .= html_writer::tag(
+            'option',
+            format_string($category->name),
+            ['value' => $category->id] + ((int) $category->id === $typefilter ? ['selected' => 'selected'] : [])
+        );
     }
     $form .= html_writer::tag('select', $options, ['name' => 'cat', 'class' => 'form-select form-select-sm custom-select',
-        'aria-label' => get_string('category', 'local_evenements'), 'onchange' => 'this.form.submit()']);
+        'aria-label' => get_string('category', 'local_evenements'), 'data-evt-autosubmit' => '1']);
 }
 $form .= html_writer::tag('button', get_string('search'), ['type' => 'submit', 'class' => 'btn btn-sm btn-outline-primary']);
 echo html_writer::div(
     html_writer::div($chips, 'evt-chips') .
-    html_writer::tag('form', $form, ['method' => 'get', 'action' => $PAGE->url->out_omit_querystring(), 'class' => 'evt-searchform']),
-    'evt-filterbar');
+    html_writer::tag('form', $form, ['method' => 'get', 'action' => $PAGE->url->out_omit_querystring(),
+        'class' => 'evt-searchform']),
+    'evt-filterbar'
+);
 
 // Table.
 $dateformat = get_string('strftimedatetimeshort', 'langconfig');
@@ -229,8 +267,10 @@ foreach ($rows as $row) {
         $cells[] = isset($sessions[$row->sessionid]) ? s(booking_manager::session_label($sessions[$row->sessionid])) : '';
     }
     $cells[] = s($row->contactname) . html_writer::div(s($row->contactemail), 'evt-psub');
-    $cells[] = html_writer::span(get_string('ticketstatus_' . $row->status, 'local_evenements'),
-        'badge evt-tstatus evt-tstatus-' . $row->status);
+    $cells[] = html_writer::span(
+        get_string('ticketstatus_' . $row->status, 'local_evenements'),
+        'badge evt-tstatus evt-tstatus-' . $row->status
+    );
     $cells[] = $row->timeused ? userdate($row->timeused, $dateformat) : '';
     if ($canedit) {
         $act = function (string $a) use ($editurl) {
@@ -238,27 +278,38 @@ foreach ($rows as $row) {
         };
         $links = html_writer::link($editurl, get_string('edit'), ['class' => 'evt-rowmenu-item']);
         if ($row->status === booking_manager::TICKET_CANCELLED) {
-            $links .= html_writer::link($act('restore'), get_string('participantrestore', 'local_evenements'), ['class' => 'evt-rowmenu-item']);
+            $links .= html_writer::link($act('restore'), get_string('participantrestore', 'local_evenements'), [
+                'class' => 'evt-rowmenu-item']);
         } else {
-            $links .= html_writer::link($act('resend'), get_string('participantresendbtn', 'local_evenements'), ['class' => 'evt-rowmenu-item']);
-            $links .= html_writer::link($act('cancel'), get_string('participantcancel', 'local_evenements'), ['class' => 'evt-rowmenu-item']);
+            $links .= html_writer::link($act('resend'), get_string('participantresendbtn', 'local_evenements'), [
+                'class' => 'evt-rowmenu-item']);
+            $links .= html_writer::link($act('cancel'), get_string('participantcancel', 'local_evenements'), [
+                'class' => 'evt-rowmenu-item']);
         }
-        $links .= html_writer::link(new moodle_url($editurl, ['action' => 'delete']), get_string('participantdelete', 'local_evenements'),
-            ['class' => 'evt-rowmenu-item text-danger']);
+        $links .= html_writer::link(
+            new moodle_url($editurl, ['action' => 'delete']),
+            get_string('participantdelete', 'local_evenements'),
+            ['class' => 'evt-rowmenu-item text-danger']
+        );
         // A <details> menu: works without the Bootstrap scripts, which the console layout may not load.
-        $cells[] = html_writer::tag('details',
+        $cells[] = html_writer::tag(
+            'details',
             html_writer::tag('summary', html_writer::tag('i', '', ['class' => 'fa-solid fa-ellipsis', 'aria-hidden' => 'true']) .
-                html_writer::span(get_string('actions'), 'visually-hidden sr-only'), ['class' => 'btn btn-sm btn-outline-secondary']) .
+                html_writer::span(get_string('actions'), 'visually-hidden sr-only'), [
+                    'class' => 'btn btn-sm btn-outline-secondary']) .
             html_writer::div($links, 'evt-rowmenu-list'),
-            ['class' => 'evt-rowmenu']);
+            ['class' => 'evt-rowmenu']
+        );
     }
     $table->rowclasses[] = $row->status === booking_manager::TICKET_CANCELLED ? 'evt-row-cancelled' : '';
     $table->data[] = $cells;
 }
 
 if (!$rows) {
-    echo $OUTPUT->notification(get_string($search !== '' || $filter !== '' || $typefilter ? 'participantnone' : 'participantempty',
-        'local_evenements'), 'info');
+    echo $OUTPUT->notification(get_string(
+        $search !== '' || $filter !== '' || $typefilter ? 'participantnone' : 'participantempty',
+        'local_evenements'
+    ), 'info');
 } else {
     echo html_writer::div(html_writer::table($table), 'table-responsive evt-ptable-wrap');
 }
@@ -286,7 +337,8 @@ if ($canedit && $rows) {
         foreach ($categories as $category) {
             $o .= html_writer::tag('option', format_string($category->name), ['value' => $category->id]);
         }
-        $extra .= html_writer::tag('select', $o, ['name' => 'bulkcategory', 'class' => 'form-select form-select-sm custom-select evt-bulk-extra',
+        $extra .= html_writer::tag('select', $o, ['name' => 'bulkcategory',
+            'class' => 'form-select form-select-sm custom-select evt-bulk-extra',
             'data-for' => 'category', 'hidden' => 'hidden', 'aria-label' => get_string('category', 'local_evenements')]);
     }
     if (isset($opts['session'])) {
@@ -294,46 +346,24 @@ if ($canedit && $rows) {
         foreach ($sessions as $session) {
             $o .= html_writer::tag('option', s(booking_manager::session_label($session)), ['value' => $session->id]);
         }
-        $extra .= html_writer::tag('select', $o, ['name' => 'bulksession', 'class' => 'form-select form-select-sm custom-select evt-bulk-extra',
+        $extra .= html_writer::tag('select', $o, ['name' => 'bulksession',
+            'class' => 'form-select form-select-sm custom-select evt-bulk-extra',
             'data-for' => 'session', 'hidden' => 'hidden', 'aria-label' => get_string('session', 'local_evenements')]);
     }
     $inner = html_writer::span('', 'evt-bulk-count', ['id' => 'evt-bulk-count']) .
         html_writer::tag('select', $select, ['name' => 'bulkaction', 'id' => 'evt-bulk-action',
             'class' => 'form-select form-select-sm custom-select', 'aria-label' => get_string('actions')]) .
         $extra .
-        html_writer::tag('button', get_string('bulkapply', 'local_evenements'), ['type' => 'submit', 'class' => 'btn btn-sm btn-primary']) .
+        html_writer::tag('button', get_string('bulkapply', 'local_evenements'), ['type' => 'submit',
+            'class' => 'btn btn-sm btn-primary']) .
         html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]) .
         html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'action', 'value' => 'bulk']);
     echo html_writer::tag('form', $inner, ['method' => 'post', 'action' => $PAGE->url->out(false), 'id' => 'evt-bulkform',
         'class' => 'evt-bulkbar', 'hidden' => 'hidden']);
-    $one = json_encode(get_string('bulkselectedone', 'local_evenements'));
-    $many = json_encode(get_string('bulkselected', 'local_evenements', '{n}'));
-    echo html_writer::script(<<<JS
-(function() {
-    var form = document.getElementById('evt-bulkform'), all = document.getElementById('evt-checkall');
-    if (!form) { return; }
-    var boxes = Array.prototype.slice.call(document.querySelectorAll('.evt-check'));
-    var count = document.getElementById('evt-bulk-count'), action = document.getElementById('evt-bulk-action');
-    function update() {
-        var n = boxes.filter(function(b) { return b.checked; }).length;
-        form.hidden = n === 0;
-        count.textContent = n === 1 ? $one : $many.replace('{n}', n);
-        if (all) { all.checked = n > 0 && n === boxes.length; all.indeterminate = n > 0 && n < boxes.length; }
-        boxes.forEach(function(b) { var tr = b.closest('tr'); if (tr) { tr.classList.toggle('is-selected', b.checked); } });
-    }
-    boxes.forEach(function(b) { b.addEventListener('change', update); });
-    if (all) { all.addEventListener('change', function() { boxes.forEach(function(b) { b.checked = all.checked; }); update(); }); }
-    action.addEventListener('change', function() {
-        form.querySelectorAll('.evt-bulk-extra').forEach(function(s) { s.hidden = s.getAttribute('data-for') !== action.value; });
-    });
-    form.addEventListener('submit', function(e) { if (!action.value) { e.preventDefault(); action.focus(); } });
-    // Only one row menu open at a time; a click elsewhere closes it.
-    var menus = document.querySelectorAll('.evt-rowmenu');
-    menus.forEach(function(d) { d.addEventListener('toggle', function() { if (d.open) { menus.forEach(function(o) { if (o !== d) { o.open = false; } }); } }); });
-    document.addEventListener('click', function(e) { menus.forEach(function(d) { if (d.open && !d.contains(e.target)) { d.open = false; } }); });
-    update();
-})();
-JS);
+    $PAGE->requires->js_call_amd('local_evenements/registrations', 'init', [
+        get_string('bulkselectedone', 'local_evenements'),
+        get_string('bulkselected', 'local_evenements', '{n}'),
+    ]);
 }
 
 // Waiting list.
@@ -371,7 +401,10 @@ if ($log) {
     $more = $limit && count($log) > $limit;
     echo ui::changelog_table($more ? array_slice($log, 0, $limit) : $log);
     if ($more) {
-        echo html_writer::link(new moodle_url($PAGE->url, ['log' => 1], 'changelog'), get_string('changelogall', 'local_evenements'));
+        echo html_writer::link(new moodle_url($PAGE->url, ['log' => 1], 'changelog'), get_string(
+            'changelogall',
+            'local_evenements'
+        ));
     }
     echo html_writer::end_tag('details');
 }

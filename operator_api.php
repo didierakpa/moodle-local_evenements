@@ -76,8 +76,10 @@ $describe = function (\stdClass $ticket) use ($event) {
 $counters = function () use ($event) {
     global $DB;
     return ['total' => booking_manager::count_tickets((int) $event->id),
-        'used' => $DB->count_records('local_evenements_ticket',
-            ['eventid' => $event->id, 'status' => booking_manager::TICKET_USED])];
+        'used' => $DB->count_records(
+            'local_evenements_ticket',
+            ['eventid' => $event->id, 'status' => booking_manager::TICKET_USED]
+        )];
 };
 
 switch ($action) {
@@ -125,7 +127,10 @@ switch ($action) {
 
     case 'undo':
         $ticket = booking_manager::get_ticket_by_token(strtolower((string) ($body['t'] ?? '')));
-        $ok = $ticket && (int) $ticket->eventid === (int) $event->id && booking_manager::undo_check_in($ticket, (int) $operator->id);
+        $ok = $ticket && (int) $ticket->eventid === (int) $event->id && booking_manager::undo_check_in(
+            $ticket,
+            (int) $operator->id
+        );
         echo json_encode(['ok' => (bool) $ok, 'counters' => $counters()]);
         break;
 

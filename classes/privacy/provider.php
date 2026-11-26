@@ -23,8 +23,6 @@ use core_privacy\local\request\contextlist;
 use core_privacy\local\request\userlist;
 use core_privacy\local\request\writer;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Privacy API implementation for local_evenements.
  *
@@ -36,10 +34,9 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class provider implements
-        \core_privacy\local\metadata\provider,
-        \core_privacy\local\request\plugin\provider,
-        \core_privacy\local\request\core_userlist_provider {
-
+    \core_privacy\local\metadata\provider,
+    \core_privacy\local\request\core_userlist_provider,
+    \core_privacy\local\request\plugin\provider {
     /**
      * Describe the stored data.
      *
@@ -125,7 +122,8 @@ class provider implements
                             OR EXISTS (SELECT 1 FROM {local_evenements_booking} b WHERE b.userid = :userid1)
                             OR EXISTS (SELECT 1 FROM {local_evenements_scanlog} s WHERE s.userid = :userid2)
                             OR EXISTS (SELECT 1 FROM {local_evenements_changelog} c WHERE c.userid = :userid5))";
-        $contextlist->add_from_sql($sql, ['level' => CONTEXT_SYSTEM, 'userid1' => $userid, 'userid2' => $userid, 'userid4' => $userid,
+        $contextlist->add_from_sql($sql, ['level' => CONTEXT_SYSTEM, 'userid1' => $userid, 'userid2' => $userid,
+            'userid4' => $userid,
             'userid3' => $userid, 'userid5' => $userid]);
         return $contextlist;
     }
@@ -309,10 +307,16 @@ class provider implements
             return;
         }
         [$insql, $params] = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
-        $DB->delete_records_select('local_evenements_answer',
-            "bookingid IN (SELECT id FROM {local_evenements_booking} WHERE userid $insql)", $params);
-        $DB->delete_records_select('local_evenements_ticket',
-            "bookingid IN (SELECT id FROM {local_evenements_booking} WHERE userid $insql)", $params);
+        $DB->delete_records_select(
+            'local_evenements_answer',
+            "bookingid IN (SELECT id FROM {local_evenements_booking} WHERE userid $insql)",
+            $params
+        );
+        $DB->delete_records_select(
+            'local_evenements_ticket',
+            "bookingid IN (SELECT id FROM {local_evenements_booking} WHERE userid $insql)",
+            $params
+        );
         $DB->delete_records_select('local_evenements_booking', "userid $insql", $params);
         $DB->delete_records_select('local_evenements_scanlog', "userid $insql", $params);
         $DB->delete_records_select('local_evenements_waitlist', "userid $insql", $params);

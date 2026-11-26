@@ -62,22 +62,33 @@ foreach ($events as $e) {
     $id = (int) $e->id;
     $tickets = booking_manager::count_tickets($id);
     $btn = function (string $path, string $label, array $extra = []) use ($id) {
-        return html_writer::link(new moodle_url('/local/evenements/' . $path, ['id' => $id]), $label,
-            ['class' => 'btn btn-sm btn-outline-secondary me-1 mb-1'] + $extra);
+        return html_writer::link(
+            new moodle_url('/local/evenements/' . $path, ['id' => $id]),
+            $label,
+            ['class' => 'btn btn-sm btn-outline-secondary me-1 mb-1'] + $extra
+        );
     };
-    $rows .= html_writer::tag('tr',
-        html_writer::tag('td', html_writer::link(new moodle_url('/local/evenements/dashboard.php', ['id' => $id]),
-            html_writer::span(format_string($e->name), 'evt-name')) . html_writer::div(userdate($e->timestart,
-            get_string('strftimedatefullshort', 'langconfig')), 'evt-note')) .
+    $rows .= html_writer::tag(
+        'tr',
+        html_writer::tag('td', html_writer::link(
+            new moodle_url('/local/evenements/dashboard.php', ['id' => $id]),
+            html_writer::span(format_string($e->name), 'evt-name')
+        ) . html_writer::div(userdate(
+            $e->timestart,
+            get_string('strftimedatefullshort', 'langconfig')
+        ), 'evt-note')) .
         html_writer::tag('td', $tickets) .
         html_writer::tag('td', $btn('export.php', get_string('exportcsv', 'local_evenements')) .
             $btn('print.php', get_string('printsheet', 'local_evenements'), ['target' => '_blank']) .
-            $btn('results.php', get_string('results', 'local_evenements'))));
+        $btn('results.php', get_string('results', 'local_evenements')))
+    );
 }
 if ($rows) {
-    echo html_writer::tag('table', html_writer::tag('thead', html_writer::tag('tr',
+    echo html_writer::tag('table', html_writer::tag('thead', html_writer::tag(
+        'tr',
         html_writer::tag('th', get_string('eventname', 'local_evenements')) .
-        html_writer::tag('th', get_string('statticketsall', 'local_evenements')) . html_writer::tag('th', ''))) .
+        html_writer::tag('th', get_string('statticketsall', 'local_evenements')) . html_writer::tag('th', '')
+    )) .
         html_writer::tag('tbody', $rows), ['class' => 'evt-table']);
 }
 echo $OUTPUT->footer();

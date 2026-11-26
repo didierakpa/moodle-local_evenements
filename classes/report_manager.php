@@ -16,8 +16,6 @@
 
 namespace local_evenements;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Report of an event: attendance, arrivals, door team, survey, comparison with the previous edition.
  * The figures are anonymous; a copy is kept when the personal data is purged, so the report and the
@@ -28,7 +26,6 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class report_manager {
-
     /** @var int Width of the arrival bars, in seconds. */
     public const ARRIVAL_STEP = 900;
 
@@ -124,7 +121,10 @@ class report_manager {
             foreach ($doors as $key => $door) {
                 if ($key[0] === 'u') {
                     $uid = (int) substr($key, 1);
-                    $doors[$key]['name'] = isset($users[$uid]) ? fullname($users[$uid]) : get_string('reportoperatorgone', 'local_evenements');
+                    $doors[$key]['name'] = isset($users[$uid]) ? fullname($users[$uid]) : get_string(
+                        'reportoperatorgone',
+                        'local_evenements'
+                    );
                 }
             }
         }
@@ -153,26 +153,32 @@ class report_manager {
             }
         }
 
-        foreach ($DB->get_records_sql("SELECT result, COUNT(id) AS n FROM {local_evenements_scanlog}
-                                        WHERE eventid = ? GROUP BY result", [$eventid]) as $row) {
+        foreach (
+            $DB->get_records_sql("SELECT result, COUNT(id) AS n FROM {local_evenements_scanlog}
+                                        WHERE eventid = ? GROUP BY result", [$eventid]) as $row
+        ) {
             if ($row->result === 'refused') {
                 $r->refused = (int) $row->n;
             } else if ($row->result === 'alreadyused') {
                 $r->alreadyused = (int) $row->n;
             }
         }
-        foreach ($DB->get_records_sql("SELECT status, COUNT(id) AS n FROM {local_evenements_waitlist}
-                                        WHERE eventid = ? GROUP BY status", [$eventid]) as $row) {
+        foreach (
+            $DB->get_records_sql("SELECT status, COUNT(id) AS n FROM {local_evenements_waitlist}
+                                        WHERE eventid = ? GROUP BY status", [$eventid]) as $row
+        ) {
             if (isset($r->waitlist[$row->status])) {
                 $r->waitlist[$row->status] = (int) $row->n;
             }
         }
         $r->survey['sent'] = $DB->count_records_select('local_evenements_booking', 'eventid = ? AND surveysent > 0', [$eventid]);
-        $r->survey['answered'] = (int) $DB->count_records_sql("SELECT COUNT(DISTINCT a.bookingid)
+        $r->survey['answered'] = (int) $DB->count_records_sql(
+            "SELECT COUNT(DISTINCT a.bookingid)
                                                                 FROM {local_evenements_answer} a
                                                                 JOIN {local_evenements_question} q ON q.id = a.questionid
                                                                WHERE a.eventid = :e AND q.moment = :m",
-            ['e' => $eventid, 'm' => 'after']);
+            ['e' => $eventid, 'm' => 'after']
+        );
         return $r;
     }
 
@@ -228,9 +234,11 @@ class report_manager {
         unset($data->snapshot);
         $json = json_encode($data);
         if ($existing = $DB->get_record('local_evenements_report', ['eventid' => $eventid])) {
-            $DB->update_record('local_evenements_report', (object) ['id' => $existing->id, 'data' => $json, 'timecreated' => time()]);
+            $DB->update_record('local_evenements_report', (object) ['id' => $existing->id, 'data' => $json, 'timecreated' => time(
+            )]);
         } else {
-            $DB->insert_record('local_evenements_report', (object) ['eventid' => $eventid, 'data' => $json, 'timecreated' => time()]);
+            $DB->insert_record('local_evenements_report', (object) ['eventid' => $eventid, 'data' => $json, 'timecreated' => time(
+            )]);
         }
     }
 

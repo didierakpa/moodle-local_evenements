@@ -50,14 +50,18 @@ if ($mform->is_cancelled()) {
     redirect($manageurl, get_string('settingssaved', 'local_evenements'), null, \core\output\notification::NOTIFY_SUCCESS);
 }
 
-$defaults = ['menuentry' => 1, 'reminderhours' => 24, 'editdeadlinehours' => 24, 'surveyemail' => 1, 'retentiondays' => 30, 'ratelimit' => 10];
+$defaults = ['menuentry' => 1, 'reminderhours' => 24, 'editdeadlinehours' => 24, 'surveyemail' => 1, 'retentiondays' => 30,
+    'ratelimit' => 10];
 $current = [];
 foreach ($defaults as $name => $default) {
     $value = get_config('local_evenements', $name);
     $current[$name] = ($value === false || $value === '') ? $default : (int) $value;
 }
 $notice = get_config('local_evenements', 'privacynotice');
-$current['privacynotice'] = ($notice === false || trim((string) $notice) === '') ? get_string('privacynotice_default', 'local_evenements') : $notice;
+$current['privacynotice'] = ($notice === false || trim((string) $notice) === '') ? get_string(
+    'privacynotice_default',
+    'local_evenements'
+) : $notice;
 $mform->set_data($current);
 
 echo $OUTPUT->header();

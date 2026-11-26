@@ -28,14 +28,18 @@ require_once($CFG->libdir . '/formslib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class import_form extends \moodleform {
-
     /**
      * Form definition.
      */
     protected function definition() {
         $mform = $this->_form;
-        $mform->addElement('filepicker', 'csvfile', get_string('csvfile', 'local_evenements'), null,
-            ['accepted_types' => ['.csv', '.txt']]);
+        $mform->addElement(
+            'filepicker',
+            'csvfile',
+            get_string('csvfile', 'local_evenements'),
+            null,
+            ['accepted_types' => ['.csv', '.txt']]
+        );
         $mform->addRule('csvfile', null, 'required', null, 'client');
         $sessions = $this->_customdata['sessions'] ?? [];
         if ($sessions) {

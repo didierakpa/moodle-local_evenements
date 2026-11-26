@@ -28,7 +28,6 @@ require_once($CFG->libdir . '/formslib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class preferences_form extends \moodleform {
-
     /**
      * Form definition.
      */
@@ -60,8 +59,12 @@ class preferences_form extends \moodleform {
         $mform->setType('retentiondays', PARAM_INT);
         $mform->addElement('text', 'ratelimit', get_string('ratelimit', 'local_evenements'), ['size' => 4]);
         $mform->setType('ratelimit', PARAM_INT);
-        $mform->addElement('textarea', 'privacynotice', get_string('privacynotice', 'local_evenements'),
-            ['rows' => 6, 'cols' => 60]);
+        $mform->addElement(
+            'textarea',
+            'privacynotice',
+            get_string('privacynotice', 'local_evenements'),
+            ['rows' => 6, 'cols' => 60]
+        );
         $mform->setType('privacynotice', PARAM_TEXT);
 
         $this->add_action_buttons(true);

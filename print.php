@@ -47,10 +47,11 @@ $rows = $DB->get_records_sql("SELECT t.id, t.firstname, t.lastname, t.status, tt
   ORDER BY t.lastname, t.firstname, t.id", ['e' => $id, 'c' => booking_manager::TICKET_CANCELLED]);
 $sessions = booking_manager::get_sessions($id);
 
+$PAGE->requires->js_call_amd('local_evenements/console', 'initActions');
 echo $OUTPUT->header();
 echo html_writer::start_div('evt-print-actions');
 echo html_writer::tag('button', get_string('printnow', 'local_evenements'), ['type' => 'button', 'class' => 'btn btn-primary',
-    'onclick' => 'window.print()']);
+    'data-evt-print' => '1']);
 echo html_writer::end_div();
 echo html_writer::tag('h1', format_string($event->name), ['class' => 'h3']);
 echo html_writer::tag('p', s(booking_manager::event_when($event)) . ' · ' .
@@ -64,15 +65,20 @@ $head = html_writer::tag('th', '✔') . html_writer::tag('th', get_string('lastn
 $body = '';
 foreach ($rows as $row) {
     $used = $row->status === booking_manager::TICKET_USED;
-    $body .= html_writer::tag('tr',
+    $body .= html_writer::tag(
+        'tr',
         html_writer::tag('td', $used ? '☑' : '☐', ['class' => 'evt-box']) .
         html_writer::tag('td', s(\core_text::strtoupper($row->lastname))) .
         html_writer::tag('td', s($row->firstname)) .
         html_writer::tag('td', s($row->category ?? '')) .
         ($sessions ? html_writer::tag('td', isset($sessions[$row->sessionid]) ?
             s(userdate($sessions[$row->sessionid]->timestart, get_string('strftimetime', 'langconfig'))) : '') : '') .
-        html_writer::tag('td', ''));
+        html_writer::tag('td', '')
+    );
 }
-echo html_writer::tag('table', html_writer::tag('thead', html_writer::tag('tr', $head)) . html_writer::tag('tbody', $body),
-    ['class' => 'evt-printtable']);
+echo html_writer::tag(
+    'table',
+    html_writer::tag('thead', html_writer::tag('tr', $head)) . html_writer::tag('tbody', $body),
+    ['class' => 'evt-printtable']
+);
 echo $OUTPUT->footer();

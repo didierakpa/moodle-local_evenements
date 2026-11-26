@@ -23,6 +23,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+// Public page: visitors and guests use it without a Moodle account (access by personal link or token).
+// phpcs:ignore moodle.Files.RequireLogin.Missing
 require_once(__DIR__ . '/../../config.php');
 
 use local_evenements\booking_manager;
@@ -59,13 +61,18 @@ if ($done) {
 }
 echo html_writer::start_tag('form', ['method' => 'post', 'action' => $PAGE->url->out(false), 'class' => 'evt-panel']);
 echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
-echo html_writer::div('<input type="text" name="website" value="" tabindex="-1" autocomplete="off">',
-    '', ['style' => 'position:absolute;left:-9999px;', 'aria-hidden' => 'true']);
+echo html_writer::div(
+    '<input type="text" name="website" value="" tabindex="-1" autocomplete="off">',
+    '',
+    ['style' => 'position:absolute;left:-9999px;', 'aria-hidden' => 'true']
+);
 echo html_writer::tag('label', get_string('contactemail', 'local_evenements'), ['for' => 'evt-mail', 'class' => 'form-label']);
 echo html_writer::empty_tag('input', ['type' => 'email', 'name' => 'email', 'id' => 'evt-mail', 'required' => 'required',
     'class' => 'form-control mb-3']);
 echo html_writer::tag('button', get_string('sendmelinks', 'local_evenements'), ['type' => 'submit', 'class' => 'btn btn-primary']);
 echo html_writer::end_tag('form');
-echo html_writer::div(html_writer::link(new moodle_url('/local/evenements/index.php'),
-    get_string('backtoevents', 'local_evenements')), 'mt-4');
+echo html_writer::div(html_writer::link(
+    new moodle_url('/local/evenements/index.php'),
+    get_string('backtoevents', 'local_evenements')
+), 'mt-4');
 echo $OUTPUT->footer();

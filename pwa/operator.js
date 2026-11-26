@@ -1,7 +1,7 @@
 /* Door app (PWA) of local_evenements: sign in with an access code, scan tickets, works offline. */
 (function() {
     'use strict';
-    var C = window.EVT_OP;
+    var C = window.EVT_OP || JSON.parse(document.body.getAttribute('data-evtop'));
     var T = C.t;
     var LS = 'evt_op_v1';
     var $ = function(id) { return document.getElementById(id); };

@@ -16,8 +16,6 @@
 
 namespace local_evenements;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Hook callbacks of the plugin.
  *
@@ -26,7 +24,6 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class hook_callbacks {
-
     /**
      * Adds a single "Events" entry to the main navigation bar (with "Manage events" for managers), according to the menu setting.
      *

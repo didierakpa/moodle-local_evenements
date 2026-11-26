@@ -16,8 +16,6 @@
 
 namespace local_evenements;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Business logic: events, bookings, named tickets, entrance checks.
  *
@@ -26,15 +24,18 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class booking_manager {
-
-    /** @var string Event statuses. */
+    /** @var string Event status: draft, not public yet. */
     public const STATUS_DRAFT = 'draft';
+    /** @var string Event status: bookings open. */
     public const STATUS_OPEN = 'open';
+    /** @var string Event status: bookings closed. */
     public const STATUS_CLOSED = 'closed';
 
-    /** @var string Ticket statuses. */
+    /** @var string Ticket status: valid, not used yet. */
     public const TICKET_VALID = 'valid';
+    /** @var string Ticket status: used at the entrance. */
     public const TICKET_USED = 'used';
+    /** @var string Ticket status: cancelled. */
     public const TICKET_CANCELLED = 'cancelled';
 
     /**
@@ -96,8 +97,11 @@ class booking_manager {
      */
     public static function count_tickets(int $eventid): int {
         global $DB;
-        return $DB->count_records_select('local_evenements_ticket', 'eventid = :e AND status <> :s',
-            ['e' => $eventid, 's' => self::TICKET_CANCELLED]);
+        return $DB->count_records_select(
+            'local_evenements_ticket',
+            'eventid = :e AND status <> :s',
+            ['e' => $eventid, 's' => self::TICKET_CANCELLED]
+        );
     }
 
     /**
@@ -186,7 +190,8 @@ class booking_manager {
         $stats = new \stdClass();
         $stats->tickets = self::count_tickets($eventid);
         $stats->used = $DB->count_records('local_evenements_ticket', ['eventid' => $eventid, 'status' => self::TICKET_USED]);
-        $stats->cancelled = $DB->count_records('local_evenements_ticket', ['eventid' => $eventid, 'status' => self::TICKET_CANCELLED]);
+        $stats->cancelled = $DB->count_records('local_evenements_ticket', ['eventid' => $eventid,
+            'status' => self::TICKET_CANCELLED]);
         $stats->bookings = $DB->count_records('local_evenements_booking', ['eventid' => $eventid, 'status' => 'active']);
         $stats->waiting = self::count_waiting($eventid);
         $stats->capacity = (int) $event->capacity;
@@ -199,8 +204,13 @@ class booking_manager {
         for ($i = 0; $i < $days; $i++) {
             $perday[userdate($from + $i * DAYSECS + 3600, '%d/%m')] = 0;
         }
-        $rows = $DB->get_records_select('local_evenements_ticket', 'eventid = :e AND status <> :c AND timecreated >= :from',
-            ['e' => $eventid, 'c' => self::TICKET_CANCELLED, 'from' => $from], '', 'id, timecreated');
+        $rows = $DB->get_records_select(
+            'local_evenements_ticket',
+            'eventid = :e AND status <> :c AND timecreated >= :from',
+            ['e' => $eventid, 'c' => self::TICKET_CANCELLED, 'from' => $from],
+            '',
+            'id, timecreated'
+        );
         foreach ($rows as $row) {
             $key = userdate($row->timecreated, '%d/%m');
             if (isset($perday[$key])) {
@@ -217,8 +227,15 @@ class booking_manager {
         }
 
         // Latest bookings.
-        $stats->latest = $DB->get_records_select('local_evenements_booking', 'eventid = :e AND status = :s',
-            ['e' => $eventid, 's' => 'active'], 'id DESC', '*', 0, 6);
+        $stats->latest = $DB->get_records_select(
+            'local_evenements_booking',
+            'eventid = :e AND status = :s',
+            ['e' => $eventid, 's' => 'active'],
+            'id DESC',
+            '*',
+            0,
+            6
+        );
         foreach ($stats->latest as $booking) {
             $booking->tickets = self::count_booking_tickets((int) $booking->id);
         }
@@ -233,8 +250,11 @@ class booking_manager {
      */
     public static function count_category_tickets(int $typeid): int {
         global $DB;
-        return $DB->count_records_select('local_evenements_ticket', 'tickettypeid = :t AND status <> :s',
-            ['t' => $typeid, 's' => self::TICKET_CANCELLED]);
+        return $DB->count_records_select(
+            'local_evenements_ticket',
+            'tickettypeid = :t AND status <> :s',
+            ['t' => $typeid, 's' => self::TICKET_CANCELLED]
+        );
     }
 
     /**
@@ -298,12 +318,24 @@ class booking_manager {
      * @return \moodle_url|null
      */
     public static function get_image_url(\stdClass $event): ?\moodle_url {
-        $files = get_file_storage()->get_area_files(\context_system::instance()->id, 'local_evenements',
-            'eventimage', $event->id, 'sortorder, id', false);
+        $files = get_file_storage()->get_area_files(
+            \context_system::instance()->id,
+            'local_evenements',
+            'eventimage',
+            $event->id,
+            'sortorder, id',
+            false
+        );
         foreach ($files as $file) {
             if ($file->is_valid_image()) {
-                return \moodle_url::make_pluginfile_url($file->get_contextid(), $file->get_component(),
-                    $file->get_filearea(), $file->get_itemid(), $file->get_filepath(), $file->get_filename());
+                return \moodle_url::make_pluginfile_url(
+                    $file->get_contextid(),
+                    $file->get_component(),
+                    $file->get_filearea(),
+                    $file->get_itemid(),
+                    $file->get_filepath(),
+                    $file->get_filename()
+                );
             }
         }
         return self::default_image_url($event);
@@ -343,11 +375,22 @@ class booking_manager {
      * @param string $ip Visitor address, only used (hashed) for the anti-spam limit
      * @param array $bookinganswers Answers about the whole booking: questionid => value
      *              (each guest may carry an 'answers' entry with questionid => value)
+     * @param int $sessionid Time slot (0 when the event has none)
+     * @param \stdClass|null $invitee Person of the invitation list who books (list events)
      * @return \stdClass The booking record
      * @throws \moodle_exception
      */
-    public static function create_booking(\stdClass $event, string $contactname, string $email, int $userid,
-            array $guests, string $ip, array $bookinganswers = [], int $sessionid = 0, ?\stdClass $invitee = null): \stdClass {
+    public static function create_booking(
+        \stdClass $event,
+        string $contactname,
+        string $email,
+        int $userid,
+        array $guests,
+        string $ip,
+        array $bookinganswers = [],
+        int $sessionid = 0,
+        ?\stdClass $invitee = null
+    ): \stdClass {
         global $DB;
 
         $n = count($guests);
@@ -367,8 +410,11 @@ class booking_manager {
         $limit = ($limit === false || $limit === '') ? 10 : (int) $limit;
         $iphash = hash('sha256', $ip . '|' . get_site_identifier());
         if ($limit > 0 && !$invitee) {
-            $recent = $DB->count_records_select('local_evenements_booking', 'iphash = :h AND timecreated > :t',
-                ['h' => $iphash, 't' => time() - HOURSECS]);
+            $recent = $DB->count_records_select(
+                'local_evenements_booking',
+                'iphash = :h AND timecreated > :t',
+                ['h' => $iphash, 't' => time() - HOURSECS]
+            );
             if ($recent >= $limit) {
                 throw new \moodle_exception('ratelimited', 'local_evenements');
             }
@@ -383,13 +429,13 @@ class booking_manager {
         }
 
         $categories = self::get_categories((int) $event->id);
-        $perCategory = [];
+        $percategory = [];
         foreach ($guests as $guest) {
             $typeid = (int) $guest['tickettypeid'];
             if ($categories && !isset($categories[$typeid])) {
                 throw new \moodle_exception('invalidcategory', 'local_evenements');
             }
-            $perCategory[$typeid] = ($perCategory[$typeid] ?? 0) + 1;
+            $percategory[$typeid] = ($percategory[$typeid] ?? 0) + 1;
         }
 
         // The lock avoids two simultaneous bookings taking the last places.
@@ -403,7 +449,12 @@ class booking_manager {
 
             if ($invitee) {
                 // One booking per person of the list, checked again under the lock.
-                $fresh = $DB->get_record('local_evenements_invitee', ['id' => $invitee->id, 'eventid' => $event->id], '*', MUST_EXIST);
+                $fresh = $DB->get_record(
+                    'local_evenements_invitee',
+                    ['id' => $invitee->id, 'eventid' => $event->id],
+                    '*',
+                    MUST_EXIST
+                );
                 if ($fresh->bookingid) {
                     throw new \moodle_exception('invitealreadybooked', 'local_evenements');
                 }
@@ -429,9 +480,11 @@ class booking_manager {
                 }
             }
             foreach ($categories as $category) {
-                $wanted = $perCategory[$category->id] ?? 0;
-                if ($wanted && $category->quota > 0 &&
-                        self::count_category_tickets((int) $category->id) + $wanted > $category->quota) {
+                $wanted = $percategory[$category->id] ?? 0;
+                if (
+                    $wanted && $category->quota > 0 &&
+                        self::count_category_tickets((int) $category->id) + $wanted > $category->quota
+                ) {
                     throw new \moodle_exception('quotareached', 'local_evenements', '', $category->name);
                 }
             }
@@ -479,10 +532,12 @@ class booking_manager {
                 $DB->set_field('local_evenements_invitee', 'bookingid', $booking->id, ['id' => $invitee->id]);
             }
 
-            $DB->execute("UPDATE {local_evenements_waitlist} SET status = :booked
+            $DB->execute(
+                "UPDATE {local_evenements_waitlist} SET status = :booked
                            WHERE eventid = :e AND status IN ('waiting', 'notified') AND " .
                 $DB->sql_equal('email', ':email', false, false),
-                ['booked' => 'booked', 'e' => $event->id, 'email' => $email]);
+                ['booked' => 'booked', 'e' => $event->id, 'email' => $email]
+            );
 
             $transaction->allow_commit();
         } catch (\Exception $e) {
@@ -609,10 +664,12 @@ class booking_manager {
      */
     public static function save_survey(\stdClass $booking, array $answers): void {
         global $DB;
-        $DB->delete_records_select('local_evenements_answer',
+        $DB->delete_records_select(
+            'local_evenements_answer',
             "bookingid = :bookingid AND questionid IN (SELECT id FROM {local_evenements_question}
                                                         WHERE eventid = :eventid AND moment = :moment)",
-            ['bookingid' => $booking->id, 'eventid' => $booking->eventid, 'moment' => 'after']);
+            ['bookingid' => $booking->id, 'eventid' => $booking->eventid, 'moment' => 'after']
+        );
         foreach ($answers as $questionid => $value) {
             self::insert_answer((int) $booking->eventid, (int) $questionid, (int) $booking->id, 0, (string) $value);
         }
@@ -651,8 +708,12 @@ class booking_manager {
     public static function cancel_booking(\stdClass $booking): void {
         global $DB;
         $DB->set_field('local_evenements_booking', 'status', 'cancelled', ['id' => $booking->id]);
-        $DB->set_field('local_evenements_ticket', 'status', self::TICKET_CANCELLED,
-            ['bookingid' => $booking->id, 'status' => self::TICKET_VALID]);
+        $DB->set_field(
+            'local_evenements_ticket',
+            'status',
+            self::TICKET_CANCELLED,
+            ['bookingid' => $booking->id, 'status' => self::TICKET_VALID]
+        );
         // Places are free again: warn the people waiting.
         $event = $DB->get_record('local_evenements_event', ['id' => $booking->eventid]);
         if ($event) {
@@ -681,8 +742,13 @@ class booking_manager {
      * @return \stdClass The waiting list entry
      * @throws \moodle_exception
      */
-    public static function join_waitlist(\stdClass $event, string $contactname, string $email, int $userid,
-            int $quantity): \stdClass {
+    public static function join_waitlist(
+        \stdClass $event,
+        string $contactname,
+        string $email,
+        int $userid,
+        int $quantity
+    ): \stdClass {
         global $DB;
         if (!self::is_open($event) || self::is_list_event($event)) {
             throw new \moodle_exception('bookingclosed', 'local_evenements');
@@ -698,8 +764,13 @@ class booking_manager {
             ]);
         }
         $sql = $DB->sql_equal('email', ':email', false, false) . ' AND eventid = :e AND status IN (:s1, :s2)';
-        if ($DB->record_exists_select('local_evenements_waitlist', $sql,
-                ['email' => $email, 'e' => $event->id, 's1' => 'waiting', 's2' => 'notified'])) {
+        if (
+            $DB->record_exists_select(
+                'local_evenements_waitlist',
+                $sql,
+                ['email' => $email, 'e' => $event->id, 's1' => 'waiting', 's2' => 'notified']
+            )
+        ) {
             throw new \moodle_exception('alreadyonwaitlist', 'local_evenements');
         }
         $entry = (object) [
@@ -766,8 +837,11 @@ class booking_manager {
             return 0;
         }
         $sent = 0;
-        $entries = $DB->get_records('local_evenements_waitlist',
-            ['eventid' => $event->id, 'status' => 'waiting'], 'id ASC');
+        $entries = $DB->get_records(
+            'local_evenements_waitlist',
+            ['eventid' => $event->id, 'status' => 'waiting'],
+            'id ASC'
+        );
         foreach ($entries as $entry) {
             if ($remaining < 1) {
                 break;
@@ -805,9 +879,13 @@ class booking_manager {
             'url' => (new \moodle_url('/local/evenements/waitlist.php', ['w' => $entry->token]))->out(false),
         ];
         $text = get_string('waitlistnoticebody', 'local_evenements', $a);
-        return (bool) email_to_user(self::make_recipient($entry->email, $entry->contactname),
-            \core_user::get_noreply_user(), get_string('waitlistnoticesubject', 'local_evenements', $a),
-            $text, text_to_html($text, false, false, true));
+        return (bool) email_to_user(
+            self::make_recipient($entry->email, $entry->contactname),
+            \core_user::get_noreply_user(),
+            get_string('waitlistnoticesubject', 'local_evenements', $a),
+            $text,
+            text_to_html($text, false, false, true)
+        );
     }
 
     /**
@@ -870,6 +948,8 @@ class booking_manager {
      *
      * @param \stdClass $ticket
      * @param int $userid The staff member
+     * @param int $time Time of the scan (0 = now; set by the door app when it syncs offline scans)
+     * @param int $operatorid Door operator (app without a Moodle account), 0 otherwise
      * @return string
      */
     public static function check_in(\stdClass $ticket, int $userid, int $time = 0, int $operatorid = 0): string {
@@ -959,8 +1039,13 @@ class booking_manager {
      * @return bool
      */
     public static function send_text(string $email, string $name, string $subject, string $text): bool {
-        return (bool) email_to_user(self::make_recipient($email, $name), \core_user::get_noreply_user(),
-            $subject, $text, text_to_html($text, false, false, true));
+        return (bool) email_to_user(
+            self::make_recipient($email, $name),
+            \core_user::get_noreply_user(),
+            $subject,
+            $text,
+            text_to_html($text, false, false, true)
+        );
     }
 
     /**
@@ -976,13 +1061,17 @@ class booking_manager {
             return 0;
         }
         $now = time();
-        $events = $DB->get_records_select('local_evenements_event',
+        $events = $DB->get_records_select(
+            'local_evenements_event',
             'status = :s AND timestart > :now AND timestart <= :limit',
-            ['s' => self::STATUS_OPEN, 'now' => $now, 'limit' => $now + $hours * HOURSECS]);
+            ['s' => self::STATUS_OPEN, 'now' => $now, 'limit' => $now + $hours * HOURSECS]
+        );
         $sent = 0;
         foreach ($events as $event) {
-            $bookings = $DB->get_records('local_evenements_booking',
-                ['eventid' => $event->id, 'status' => 'active', 'remindersent' => 0]);
+            $bookings = $DB->get_records(
+                'local_evenements_booking',
+                ['eventid' => $event->id, 'status' => 'active', 'remindersent' => 0]
+            );
             foreach ($bookings as $booking) {
                 $a = (object) [
                     'name' => $booking->contactname,
@@ -995,9 +1084,14 @@ class booking_manager {
                 // Marked first: a failing mail server must not cause the same mail to be sent again and again.
                 $DB->set_field('local_evenements_booking', 'remindersent', $now, ['id' => $booking->id]);
                 try {
-                    if (self::send_text($booking->email, $booking->contactname,
+                    if (
+                        self::send_text(
+                            $booking->email,
+                            $booking->contactname,
                             get_string('remindersubject', 'local_evenements', $a),
-                            get_string('reminderbody', 'local_evenements', $a))) {
+                            get_string('reminderbody', 'local_evenements', $a)
+                        )
+                    ) {
                         $sent++;
                     }
                 } catch (\Throwable $e) {
@@ -1031,12 +1125,14 @@ class booking_manager {
             if (!self::get_questions((int) $event->id, 'after')) {
                 continue;
             }
-            $bookings = $DB->get_records_sql("SELECT b.*
+            $bookings = $DB->get_records_sql(
+                "SELECT b.*
                   FROM {local_evenements_booking} b
                  WHERE b.eventid = :e AND b.status = 'active' AND b.surveysent = 0
                        AND EXISTS (SELECT 1 FROM {local_evenements_ticket} t
                                     WHERE t.bookingid = b.id AND t.status = :used)",
-                ['e' => $event->id, 'used' => self::TICKET_USED]);
+                ['e' => $event->id, 'used' => self::TICKET_USED]
+            );
             foreach ($bookings as $booking) {
                 $a = (object) [
                     'name' => $booking->contactname,
@@ -1045,9 +1141,14 @@ class booking_manager {
                 ];
                 $DB->set_field('local_evenements_booking', 'surveysent', $now, ['id' => $booking->id]);
                 try {
-                    if (self::send_text($booking->email, $booking->contactname,
+                    if (
+                        self::send_text(
+                            $booking->email,
+                            $booking->contactname,
                             get_string('surveysubject', 'local_evenements', $a),
-                            get_string('surveybody', 'local_evenements', $a))) {
+                            get_string('surveybody', 'local_evenements', $a)
+                        )
+                    ) {
                         $sent++;
                     }
                 } catch (\Throwable $e) {
@@ -1066,8 +1167,11 @@ class booking_manager {
      */
     public static function count_booking_tickets(int $bookingid): int {
         global $DB;
-        return $DB->count_records_select('local_evenements_ticket', 'bookingid = :b AND status <> :c',
-            ['b' => $bookingid, 'c' => self::TICKET_CANCELLED]);
+        return $DB->count_records_select(
+            'local_evenements_ticket',
+            'bookingid = :b AND status <> :c',
+            ['b' => $bookingid, 'c' => self::TICKET_CANCELLED]
+        );
     }
 
     /**
@@ -1082,7 +1186,13 @@ class booking_manager {
         global $DB;
         $sent = 0;
         $done = [];
-        foreach ($DB->get_records('local_evenements_booking', ['eventid' => $event->id, 'status' => 'active'], 'id ASC') as $booking) {
+        foreach (
+            $DB->get_records(
+                'local_evenements_booking',
+                ['eventid' => $event->id, 'status' => 'active'],
+                'id ASC'
+            ) as $booking
+        ) {
             $key = \core_text::strtolower(trim($booking->email));
             if (isset($done[$key])) {
                 continue;
@@ -1166,13 +1276,20 @@ class booking_manager {
     public static function get_live_counters(): array {
         global $DB;
         $now = time();
-        $events = $DB->get_records_select('local_evenements_event',
-            'status = :s AND timestart BETWEEN :from AND :to', ['s' => self::STATUS_OPEN,
-            'from' => $now - DAYSECS, 'to' => $now + DAYSECS], 'timestart ASC');
+        $events = $DB->get_records_select(
+            'local_evenements_event',
+            'status = :s AND timestart BETWEEN :from AND :to',
+            ['s' => self::STATUS_OPEN,
+            'from' => $now - DAYSECS,
+            'to' => $now + DAYSECS],
+            'timestart ASC'
+        );
         foreach ($events as $event) {
             $event->total = self::count_tickets((int) $event->id);
-            $event->used = $DB->count_records('local_evenements_ticket',
-                ['eventid' => $event->id, 'status' => self::TICKET_USED]);
+            $event->used = $DB->count_records(
+                'local_evenements_ticket',
+                ['eventid' => $event->id, 'status' => self::TICKET_USED]
+            );
         }
         return $events;
     }
@@ -1267,7 +1384,7 @@ class booking_manager {
         return count($ids);
     }
 
-    // ---------------------------------------------------------------- Time slots.
+    // Time slots.
 
     /**
      * Time slots of an event, in chronological order, indexed by id.
@@ -1288,11 +1405,13 @@ class booking_manager {
      */
     public static function count_session_tickets(int $sessionid): int {
         global $DB;
-        return (int) $DB->count_records_sql("SELECT COUNT(t.id)
+        return (int) $DB->count_records_sql(
+            "SELECT COUNT(t.id)
               FROM {local_evenements_ticket} t
               JOIN {local_evenements_booking} b ON b.id = t.bookingid
              WHERE b.sessionid = :sid AND t.status <> :cancelled",
-            ['sid' => $sessionid, 'cancelled' => self::TICKET_CANCELLED]);
+            ['sid' => $sessionid, 'cancelled' => self::TICKET_CANCELLED]
+        );
     }
 
     /**
@@ -1347,7 +1466,7 @@ class booking_manager {
         return $copy;
     }
 
-    // ---------------------------------------------------------------- Co-organisers.
+    // Co-organisers.
 
     /**
      * Whether a user is a co-organiser of an event.
@@ -1383,8 +1502,12 @@ class booking_manager {
     public static function require_event_access(int $eventid, string $capability = 'local/evenements:manage'): void {
         require_login();
         if (!self::can_manage($eventid, $capability)) {
-            throw new \required_capability_exception(\context_system::instance(), $capability,
-                'nopermissions', '');
+            throw new \required_capability_exception(
+                \context_system::instance(),
+                $capability,
+                'nopermissions',
+                ''
+            );
         }
     }
 
@@ -1398,11 +1521,15 @@ class booking_manager {
         if (!isloggedin() || isguestuser()) {
             return [];
         }
-        return array_map('intval', $DB->get_fieldset_select('local_evenements_organiser', 'eventid', 'userid = ?',
-            [$USER->id]));
+        return array_map('intval', $DB->get_fieldset_select(
+            'local_evenements_organiser',
+            'eventid',
+            'userid = ?',
+            [$USER->id]
+        ));
     }
 
-    // ---------------------------------------------------------------- CSV import.
+    // CSV import.
 
     /**
      * Creates one booking (with one ticket) per CSV row: lastname, firstname, e-mail, category (optional).
@@ -1491,7 +1618,7 @@ class booking_manager {
         return $report;
     }
 
-    // ---------------------------------------------------------------- Changing a guest.
+    // Changing a guest.
 
     /**
      * Whether the holder of a booking may still change the name on a ticket (not used, before the deadline).
@@ -1512,7 +1639,7 @@ class booking_manager {
         return time() < (int) $event->timestart - $hours * HOURSECS;
     }
 
-    // ---------------------------------------------------------------- Lost tickets.
+    // Lost tickets.
 
     /**
      * Sends to an address the links of all its active bookings of upcoming events. Silent when there are none.
@@ -1537,12 +1664,16 @@ class booking_manager {
                 self::booking_url($booking)->out(false);
         }
         $first = reset($bookings);
-        self::send_text($email, $first->contactname, get_string('lostticketssubject', 'local_evenements'),
-            get_string('lostticketsbody', 'local_evenements', implode("\n\n", $lines)));
+        self::send_text(
+            $email,
+            $first->contactname,
+            get_string('lostticketssubject', 'local_evenements'),
+            get_string('lostticketsbody', 'local_evenements', implode("\n\n", $lines))
+        );
         return count($bookings);
     }
 
-    // ---------------------------------------------------------------- Door operators (app, no Moodle account).
+    // Door operators (app, no Moodle account).
 
     /**
      * Creates an operator for an event, with a random access code.
@@ -1660,8 +1791,10 @@ class booking_manager {
     public static function undo_check_in(\stdClass $ticket, int $operatorid): bool {
         global $DB;
         $fresh = $DB->get_record('local_evenements_ticket', ['id' => $ticket->id]);
-        if (!$fresh || $fresh->status !== self::TICKET_USED || (int) $fresh->operatorid !== $operatorid ||
-                time() - (int) $fresh->timeused > 5 * MINSECS) {
+        if (
+            !$fresh || $fresh->status !== self::TICKET_USED || (int) $fresh->operatorid !== $operatorid ||
+                time() - (int) $fresh->timeused > 5 * MINSECS
+        ) {
             return false;
         }
         $DB->update_record('local_evenements_ticket', (object) ['id' => $fresh->id, 'status' => self::TICKET_VALID,
@@ -1691,8 +1824,15 @@ class booking_manager {
             $stats->peroperator[$label] = ($stats->peroperator[$label] ?? 0) + (int) $row->n;
         }
         arsort($stats->peroperator);
-        $tickets = $DB->get_records_select('local_evenements_ticket', 'eventid = :e AND status = :s',
-            ['e' => $eventid, 's' => self::TICKET_USED], 'timeused DESC', '*', 0, $latest);
+        $tickets = $DB->get_records_select(
+            'local_evenements_ticket',
+            'eventid = :e AND status = :s',
+            ['e' => $eventid, 's' => self::TICKET_USED],
+            'timeused DESC',
+            '*',
+            0,
+            $latest
+        );
         foreach ($tickets as $t) {
             $stats->latest[] = (object) ['name' => trim($t->firstname . ' ' . $t->lastname), 'time' => (int) $t->timeused,
                 'by' => self::validated_by($t)];
@@ -1700,7 +1840,7 @@ class booking_manager {
         return $stats;
     }
 
-    // ---------------------------------------------------------------- Invitation list (closed registration).
+    // Invitation list (closed registration).
 
     /**
      * Category name of a ticket followed by its mention ("Guest of ...").
@@ -1785,8 +1925,15 @@ class booking_manager {
      * @param int|null $quota Number of guests (null = default of the event)
      * @return \stdClass|null The invitee, or null when it is already in the list
      */
-    public static function add_invitee(\stdClass $event, string $first, string $last, string $email, string $category,
-            string $detail = '', ?int $quota = null): ?\stdClass {
+    public static function add_invitee(
+        \stdClass $event,
+        string $first,
+        string $last,
+        string $email,
+        string $category,
+        string $detail = '',
+        ?int $quota = null
+    ): ?\stdClass {
         global $DB;
         $key = self::name_key($first, $last);
         foreach ($DB->get_records('local_evenements_invitee', ['eventid' => $event->id, 'namekey' => $key]) as $existing) {
@@ -1801,7 +1948,10 @@ class booking_manager {
             'lastname' => \core_text::substr($last, 0, 100),
             'namekey' => $key,
             'email' => \core_text::substr($email, 0, 255),
-            'tickettypeid' => self::ensure_category((int) $event->id, $category !== '' ? $category : get_string('invcategorydefault', 'local_evenements')),
+            'tickettypeid' => self::ensure_category((int) $event->id, $category !== '' ? $category : get_string(
+                'invcategorydefault',
+                'local_evenements'
+            )),
             'detail' => \core_text::substr($detail, 0, 255),
             'quota' => $quota,
             'token' => self::new_token(),
@@ -1836,12 +1986,21 @@ class booking_manager {
                 continue;
             }
             if (count($cols) < 3 || $cols[0] === '' || $cols[1] === '' || !validate_email($cols[2])) {
-                $errors[] = get_string('invimporterror', 'local_evenements', (object) ['line' => $lineno, 'text' => s(\core_text::substr($line, 0, 60))]);
+                $errors[] = get_string('invimporterror', 'local_evenements', (object) ['line' => $lineno, 'text' => s(
+                    \core_text::substr($line, 0, 60)
+                )]);
                 continue;
             }
             $quota = (isset($cols[5]) && $cols[5] !== '' && ctype_digit($cols[5])) ? (int) $cols[5] : null;
-            $invitee = self::add_invitee($event, clean_param($cols[1], PARAM_TEXT), clean_param($cols[0], PARAM_TEXT),
-                clean_param($cols[2], PARAM_EMAIL), clean_param($cols[3] ?? '', PARAM_TEXT), clean_param($cols[4] ?? '', PARAM_TEXT), $quota);
+            $invitee = self::add_invitee(
+                $event,
+                clean_param($cols[1], PARAM_TEXT),
+                clean_param($cols[0], PARAM_TEXT),
+                clean_param($cols[2], PARAM_EMAIL),
+                clean_param($cols[3] ?? '', PARAM_TEXT),
+                clean_param($cols[4] ?? '', PARAM_TEXT),
+                $quota
+            );
             if ($invitee) {
                 $added++;
             } else {
@@ -1894,8 +2053,12 @@ class booking_manager {
             'url' => self::invitee_url($invitee)->out(false),
             'guests' => (int) $invitee->quota,
         ];
-        $sent = self::send_text($invitee->email, trim($invitee->firstname . ' ' . $invitee->lastname),
-            get_string('invitemailsubject', 'local_evenements', $a), get_string('invitemailbody', 'local_evenements', $a));
+        $sent = self::send_text(
+            $invitee->email,
+            trim($invitee->firstname . ' ' . $invitee->lastname),
+            get_string('invitemailsubject', 'local_evenements', $a),
+            get_string('invitemailbody', 'local_evenements', $a)
+        );
         if ($sent) {
             $DB->set_field('local_evenements_invitee', 'timeinvited', time(), ['id' => $invitee->id]);
         }
@@ -1932,14 +2095,23 @@ class booking_manager {
     public static function duplicate_names(int $eventid): array {
         global $DB;
         $key = [];
-        foreach ($DB->get_records_select('local_evenements_ticket', 'eventid = ? AND status <> ?',
-                [$eventid, self::TICKET_CANCELLED], '', 'id, firstname, lastname, bookingid') as $t) {
+        foreach (
+            $DB->get_records_select(
+                'local_evenements_ticket',
+                'eventid = ? AND status <> ?',
+                [$eventid, self::TICKET_CANCELLED],
+                '',
+                'id, firstname, lastname, bookingid'
+            ) as $t
+        ) {
             $key[self::name_key($t->firstname, $t->lastname)][] = $t;
         }
         $out = [];
         foreach ($key as $k => $tickets) {
             if (count($tickets) > 1) {
-                $out[] = (object) ['name' => trim($tickets[0]->firstname . ' ' . $tickets[0]->lastname), 'total' => count($tickets)];
+                $out[] = (object) ['name' => trim($tickets[0]->firstname . ' ' . $tickets[0]->lastname), 'total' => count(
+                    $tickets
+                )];
             }
         }
         return $out;

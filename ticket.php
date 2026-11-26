@@ -22,6 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+// Public page: visitors and guests use it without a Moodle account (access by personal link or token).
+// phpcs:ignore moodle.Files.RequireLogin.Missing
 require_once(__DIR__ . '/../../config.php');
 
 use local_evenements\booking_manager;
@@ -50,8 +52,12 @@ $active = ($booking->status === 'active');
 if ($action === 'cancel' && $active) {
     if (optional_param('confirm', 0, PARAM_BOOL) && confirm_sesskey()) {
         booking_manager::cancel_booking($booking);
-        redirect($PAGE->url, get_string('bookingcancelled', 'local_evenements'), null,
-            \core\output\notification::NOTIFY_SUCCESS);
+        redirect(
+            $PAGE->url,
+            get_string('bookingcancelled', 'local_evenements'),
+            null,
+            \core\output\notification::NOTIFY_SUCCESS
+        );
     }
     echo $OUTPUT->header();
     echo $OUTPUT->confirm(
@@ -78,11 +84,14 @@ if (optional_param('new', 0, PARAM_INT) === 1 && $active) {
 echo html_writer::div(
     ui::date_badge($event) .
     html_writer::div(html_writer::div(format_string($event->name), 'evt-strip-title') . ui::meta($event)),
-    'evt-strip');
+    'evt-strip'
+);
 
 if (!$active) {
-    echo $OUTPUT->notification(get_string('bookingiscancelled', 'local_evenements'),
-        \core\output\notification::NOTIFY_WARNING);
+    echo $OUTPUT->notification(
+        get_string('bookingiscancelled', 'local_evenements'),
+        \core\output\notification::NOTIFY_WARNING
+    );
 }
 
 echo html_writer::tag('h2', get_string('mytickets', 'local_evenements'), ['class' => 'h4']);
@@ -91,50 +100,79 @@ foreach ($tickets as $ticket) {
     $category = booking_manager::ticket_label($ticket, $categories);
     $link = '';
     if ($active && booking_manager::can_edit_ticket($event, $ticket)) {
-        $link .= html_writer::link(new moodle_url('/local/evenements/editticket.php', ['b' => $token, 't' => $ticket->token]),
-            get_string('changeguest', 'local_evenements'), ['class' => 'btn btn-outline-secondary btn-sm me-1']);
+        $link .= html_writer::link(
+            new moodle_url('/local/evenements/editticket.php', ['b' => $token, 't' => $ticket->token]),
+            get_string('changeguest', 'local_evenements'),
+            ['class' => 'btn btn-outline-secondary btn-sm me-1']
+        );
     }
     if ($ticket->status !== booking_manager::TICKET_CANCELLED) {
-        $link .= html_writer::link(new moodle_url('/local/evenements/download.php',
-            ['b' => $token, 't' => $ticket->token]), get_string('downloadticket', 'local_evenements'),
-            ['class' => 'btn btn-outline-primary btn-sm']);
+        $link .= html_writer::link(
+            new moodle_url(
+                '/local/evenements/download.php',
+                ['b' => $token, 't' => $ticket->token]
+            ),
+            get_string('downloadticket', 'local_evenements'),
+            ['class' => 'btn btn-outline-primary btn-sm']
+        );
     }
     $statusclass = $ticket->status === booking_manager::TICKET_CANCELLED ? 'is-cancelled' :
         ($ticket->status === booking_manager::TICKET_USED ? 'is-used' : '');
     echo html_writer::div(
         html_writer::div(html_writer::div(s($ticket->firstname . ' ' . $ticket->lastname), 'evt-ticket-name') .
             html_writer::div(s($category), 'evt-ticket-cat'), 'evt-ticket-main') .
-        html_writer::div(html_writer::span(get_string('ticketstatus_' . $ticket->status, 'local_evenements'),
-            'badge bg-light text-dark border') . $link, 'evt-ticket-actions'),
-        'evt-ticket ' . $statusclass);
+        html_writer::div(html_writer::span(
+            get_string('ticketstatus_' . $ticket->status, 'local_evenements'),
+            'badge bg-light text-dark border'
+        ) . $link, 'evt-ticket-actions'),
+        'evt-ticket ' . $statusclass
+    );
 }
 echo html_writer::end_div();
 
 if ($active) {
     echo html_writer::start_div('evt-actions');
-    echo html_writer::link(new moodle_url('/local/evenements/download.php', ['b' => $token]),
-        get_string('downloadall', 'local_evenements'), ['class' => 'btn btn-primary']);
+    echo html_writer::link(
+        new moodle_url('/local/evenements/download.php', ['b' => $token]),
+        get_string('downloadall', 'local_evenements'),
+        ['class' => 'btn btn-primary']
+    );
     if (in_array($event->ticketformat ?? 'concert', ['compact', 'boarding'], true)) {
-        echo html_writer::link(new moodle_url('/local/evenements/download.php', ['b' => $token, 'sheet' => 1]),
+        echo html_writer::link(
+            new moodle_url('/local/evenements/download.php', ['b' => $token, 'sheet' => 1]),
             html_writer::tag('i', '', ['class' => 'fa-solid fa-print me-1', 'aria-hidden' => 'true']) .
-            get_string('printsheetA4', 'local_evenements'), ['class' => 'btn btn-outline-secondary']);
+            get_string('printsheetA4', 'local_evenements'),
+            ['class' => 'btn btn-outline-secondary']
+        );
     }
-    echo html_writer::link(new moodle_url('/local/evenements/ics.php', ['b' => $token]),
+    echo html_writer::link(
+        new moodle_url('/local/evenements/ics.php', ['b' => $token]),
         html_writer::tag('i', '', ['class' => 'fa-regular fa-calendar-plus me-1', 'aria-hidden' => 'true']) .
-        get_string('addtocalendar', 'local_evenements'), ['class' => 'btn btn-outline-secondary']);
+        get_string('addtocalendar', 'local_evenements'),
+        ['class' => 'btn btn-outline-secondary']
+    );
     $gend = $event->timeend ?: $event->timestart + 2 * HOURSECS;
-    echo html_writer::link(new moodle_url('https://calendar.google.com/calendar/render', [
+    echo html_writer::link(
+        new moodle_url('https://calendar.google.com/calendar/render', [
         'action' => 'TEMPLATE', 'text' => format_string($event->name, true, ['escape' => false]),
         'dates' => gmdate('Ymd\THis\Z', (int) $event->timestart) . '/' . gmdate('Ymd\THis\Z', (int) $gend),
         'location' => (string) ($event->location ?? ''), 'details' => $PAGE->url->out(false)]),
-        get_string('addtogooglecalendar', 'local_evenements'), ['class' => 'btn btn-outline-secondary', 'target' => '_blank',
-            'rel' => 'noopener']);
-    echo html_writer::link(new moodle_url($PAGE->url, ['action' => 'cancel']),
-        get_string('cancelbooking', 'local_evenements'), ['class' => 'btn btn-outline-danger']);
+        get_string('addtogooglecalendar', 'local_evenements'),
+        ['class' => 'btn btn-outline-secondary', 'target' => '_blank',
+        'rel' => 'noopener']
+    );
+    echo html_writer::link(
+        new moodle_url($PAGE->url, ['action' => 'cancel']),
+        get_string('cancelbooking', 'local_evenements'),
+        ['class' => 'btn btn-outline-danger']
+    );
     echo html_writer::end_div();
     if (time() >= $event->timestart && booking_manager::get_questions((int) $event->id, 'after')) {
-        echo html_writer::div(html_writer::link(new moodle_url('/local/evenements/survey.php', ['b' => $token]),
-            get_string('givefeedback', 'local_evenements'), ['class' => 'btn btn-outline-primary']), 'mt-3');
+        echo html_writer::div(html_writer::link(
+            new moodle_url('/local/evenements/survey.php', ['b' => $token]),
+            get_string('givefeedback', 'local_evenements'),
+            ['class' => 'btn btn-outline-primary']
+        ), 'mt-3');
     }
     echo html_writer::tag('p', get_string('keepthislink', 'local_evenements'), ['class' => 'text-muted mt-3']);
 }

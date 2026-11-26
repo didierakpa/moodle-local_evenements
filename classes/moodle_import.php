@@ -16,8 +16,6 @@
 
 namespace local_evenements;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Add people from Moodle (a cohort, or the users of a course with a given role) to an event:
  * to its invitation list (list events) or straight as participants with a ticket.
@@ -27,7 +25,6 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class moodle_import {
-
     /**
      * Cohorts the current user may read, with their number of members.
      *
@@ -150,8 +147,14 @@ class moodle_import {
         foreach ($people as $user) {
             try {
                 if ($islist) {
-                    $invitee = booking_manager::add_invitee($event, $user->firstname, $user->lastname, (string) $user->email,
-                        (string) ($options->category ?? ''), (string) ($options->detail ?? ''));
+                    $invitee = booking_manager::add_invitee(
+                        $event,
+                        $user->firstname,
+                        $user->lastname,
+                        (string) $user->email,
+                        (string) ($options->category ?? ''),
+                        (string) ($options->detail ?? '')
+                    );
                     if ($invitee) {
                         $report->added++;
                     } else {
@@ -176,16 +179,24 @@ class moodle_import {
                 $report->failed++;
                 $report->messages[] = trim($user->firstname . ' ' . $user->lastname) . ' : ' . $e->getMessage();
                 // Event full: the next ones would fail the same way.
-                if (empty($options->force) && $e->errorcode === 'changeproblem' &&
-                        booking_manager::remaining($event) === 0) {
+                if (
+                    empty($options->force) && $e->errorcode === 'changeproblem' &&
+                        booking_manager::remaining($event) === 0
+                ) {
                     $report->failed += count($people) - $report->added - $report->skipped - $report->failed;
                     break;
                 }
             }
         }
         if ($report->added) {
-            participant_manager::log((int) $event->id, 0, 0, 'add',
-                get_string('logmoodleimport', 'local_evenements', (object) ['n' => $report->added, 'source' => $options->sourcename ?? '']));
+            participant_manager::log(
+                (int) $event->id,
+                0,
+                0,
+                'add',
+                get_string('logmoodleimport', 'local_evenements', (object) ['n' => $report->added,
+                    'source' => $options->sourcename ?? ''])
+            );
         }
         return $report;
     }

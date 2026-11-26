@@ -31,7 +31,6 @@ require_once($CFG->libdir . '/formslib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class moodle_import_form extends \moodleform {
-
     /**
      * Form definition.
      */
@@ -75,8 +74,10 @@ class moodle_import_form extends \moodleform {
             $mform->setDefault('category', get_string('invcategorydefault', 'local_evenements'));
             $mform->addElement('text', 'detail', get_string('mimportdetail', 'local_evenements'), ['size' => 40]);
             $mform->setType('detail', PARAM_TEXT);
-            $mform->addElement('static', 'listhelp', '', \html_writer::span(get_string('mimportlisthelp', 'local_evenements'),
-                'text-muted small'));
+            $mform->addElement('static', 'listhelp', '', \html_writer::span(
+                get_string('mimportlisthelp', 'local_evenements'),
+                'text-muted small'
+            ));
         } else {
             if ($categories) {
                 $options = [];
@@ -99,8 +100,10 @@ class moodle_import_form extends \moodleform {
             }
             $mform->addElement('advcheckbox', 'sendmail', '', get_string('mimportsend', 'local_evenements'));
             $mform->addElement('advcheckbox', 'force', '', get_string('participantforce', 'local_evenements'));
-            $mform->addElement('static', 'help', '', \html_writer::span(get_string('mimporthelp', 'local_evenements'),
-                'text-muted small'));
+            $mform->addElement('static', 'help', '', \html_writer::span(
+                get_string('mimporthelp', 'local_evenements'),
+                'text-muted small'
+            ));
         }
 
         $buttons = [

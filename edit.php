@@ -69,7 +69,8 @@ if ($data = $mform->get_data()) {
     $record->guestquota = max(0, min(20, (int) ($data->guestquota ?? 3)));
     $record->status = $data->status;
     $record->ticketcolor = trim($data->ticketcolor);
-    $record->ticketformat = in_array($data->ticketformat, ['concert', 'boarding', 'compact'], true) ? $data->ticketformat : 'compact';
+    $record->ticketformat = in_array($data->ticketformat, ['concert', 'boarding', 'compact'], true) ? $data->ticketformat
+        : 'compact';
     $record->ticketfont = in_array($data->ticketfont, ['sans', 'serif', 'mono'], true) ? $data->ticketfont : 'sans';
     $record->tickettitle = $data->tickettitle;
     $record->tickettext = $data->tickettext;
@@ -86,29 +87,58 @@ if ($data = $mform->get_data()) {
 
     booking_manager::process_waitlist(booking_manager::get_event($id));
 
-    file_save_draft_area_files($data->eventimage, $context->id, 'local_evenements', 'eventimage', $id,
-        event_form::image_options());
-    file_save_draft_area_files($data->ticketlogo, $context->id, 'local_evenements', 'ticketlogo', $id,
-        event_form::image_options());
+    file_save_draft_area_files(
+        $data->eventimage,
+        $context->id,
+        'local_evenements',
+        'eventimage',
+        $id,
+        event_form::image_options()
+    );
+    file_save_draft_area_files(
+        $data->ticketlogo,
+        $context->id,
+        'local_evenements',
+        'ticketlogo',
+        $id,
+        event_form::image_options()
+    );
     booking_manager::save_categories($id, preg_split('/\R/', (string) $data->categories));
 
-    redirect(new moodle_url('/local/evenements/dashboard.php', ['id' => $id]),
-        get_string('eventsaved', 'local_evenements'), null, \core\output\notification::NOTIFY_SUCCESS);
+    redirect(
+        new moodle_url('/local/evenements/dashboard.php', ['id' => $id]),
+        get_string('eventsaved', 'local_evenements'),
+        null,
+        \core\output\notification::NOTIFY_SUCCESS
+    );
 }
 
 // Fill the form.
 $draftitemid = file_get_submitted_draft_itemid('eventimage');
-file_prepare_draft_area($draftitemid, $context->id, 'local_evenements', 'eventimage', $id ?: null,
-    event_form::image_options());
+file_prepare_draft_area(
+    $draftitemid,
+    $context->id,
+    'local_evenements',
+    'eventimage',
+    $id ?: null,
+    event_form::image_options()
+);
 $logodraftid = file_get_submitted_draft_itemid('ticketlogo');
-file_prepare_draft_area($logodraftid, $context->id, 'local_evenements', 'ticketlogo', $id ?: null,
-    event_form::image_options());
+file_prepare_draft_area(
+    $logodraftid,
+    $context->id,
+    'local_evenements',
+    'ticketlogo',
+    $id ?: null,
+    event_form::image_options()
+);
 
 if ($id) {
     $event = booking_manager::get_event($id);
     $lines = [];
     foreach (booking_manager::get_categories($id) as $category) {
-        $lines[] = $category->name . ($category->quota || $category->info ? '|' . (int) $category->quota : '') . ($category->info ? '|' . $category->info : '');
+        $lines[] = $category->name . ($category->quota || $category->info ? '|' . (int) $category->quota : '') . (
+            $category->info ? '|' . $category->info : '');
     }
     $event->description_editor = ['text' => $event->description ?? '', 'format' => $event->descriptionformat];
     $event->categories = implode("\n", $lines);

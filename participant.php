@@ -71,13 +71,19 @@ if ($ticket && in_array($action, ['cancel', 'restore', 'resend', 'delete'], true
             case 'cancel':
                 participant_manager::cancel_ticket($event, $ticket);
                 redirect($PAGE->url, get_string('participantcancelled', 'local_evenements'), null, $ok);
+                break;
             case 'restore':
                 participant_manager::restore_ticket($event, $ticket, optional_param('force', 0, PARAM_BOOL));
                 redirect($PAGE->url, get_string('participantrestored', 'local_evenements'), null, $ok);
+                break;
             case 'resend':
                 $sent = participant_manager::resend($event, $booking);
-                redirect($PAGE->url, get_string($sent ? 'participantresent' : 'participantresendfailed', 'local_evenements',
-                    s($booking->email)), null, $sent ? $ok : $error);
+                redirect($PAGE->url, get_string(
+                    $sent ? 'participantresent' : 'participantresendfailed',
+                    'local_evenements',
+                    s($booking->email)
+                ), null, $sent ? $ok : $error);
+                break;
             case 'delete':
                 participant_manager::delete_ticket($event, $ticket);
                 redirect($list, get_string('participantdeleted', 'local_evenements'), null, $ok);
@@ -99,7 +105,10 @@ if ($data = $mform->get_data()) {
     try {
         if ($ticket) {
             $changes = participant_manager::update_ticket($event, $ticket, $data, !empty($data->force));
-            $message = $changes ? get_string('participantsaved', 'local_evenements') : get_string('participantnochange', 'local_evenements');
+            $message = $changes ? get_string('participantsaved', 'local_evenements') : get_string(
+                'participantnochange',
+                'local_evenements'
+            );
             $booking = $DB->get_record('local_evenements_booking', ['id' => $ticket->bookingid], '*', MUST_EXIST);
         } else {
             $booking = participant_manager::add_participant($event, $data, !empty($data->force));
@@ -138,8 +147,10 @@ echo $OUTPUT->heading(get_string($ticket ? 'participantedit' : 'participantadd',
 
 if ($ticket) {
     $dateformat = get_string('strftimedatetimeshort', 'langconfig');
-    $status = html_writer::span(get_string('ticketstatus_' . $ticket->status, 'local_evenements'),
-        'badge evt-tstatus evt-tstatus-' . $ticket->status);
+    $status = html_writer::span(
+        get_string('ticketstatus_' . $ticket->status, 'local_evenements'),
+        'badge evt-tstatus evt-tstatus-' . $ticket->status
+    );
     $facts = [
         get_string('status', 'local_evenements') => $status,
         get_string('participantnumber', 'local_evenements') => '#' . $ticket->id,
@@ -157,18 +168,33 @@ if ($ticket) {
         return new moodle_url($PAGE->url, ['action' => $a, 'sesskey' => sesskey()] + $extra);
     };
     if ($ticket->status === booking_manager::TICKET_CANCELLED) {
-        $actions[] = html_writer::link($url('restore'), get_string('participantrestore', 'local_evenements'),
-            ['class' => 'btn btn-sm btn-success']);
+        $actions[] = html_writer::link(
+            $url('restore'),
+            get_string('participantrestore', 'local_evenements'),
+            ['class' => 'btn btn-sm btn-success']
+        );
     } else {
-        $actions[] = html_writer::link($url('resend'), get_string('participantresendbtn', 'local_evenements'),
-            ['class' => 'btn btn-sm btn-outline-primary']);
-        $actions[] = html_writer::link(booking_manager::booking_url($booking), get_string('participantopenticket', 'local_evenements'),
-            ['class' => 'btn btn-sm btn-outline-secondary', 'target' => '_blank', 'rel' => 'noopener']);
-        $actions[] = html_writer::link($url('cancel'), get_string('participantcancel', 'local_evenements'),
-            ['class' => 'btn btn-sm btn-outline-warning']);
+        $actions[] = html_writer::link(
+            $url('resend'),
+            get_string('participantresendbtn', 'local_evenements'),
+            ['class' => 'btn btn-sm btn-outline-primary']
+        );
+        $actions[] = html_writer::link(
+            booking_manager::booking_url($booking),
+            get_string('participantopenticket', 'local_evenements'),
+            ['class' => 'btn btn-sm btn-outline-secondary', 'target' => '_blank', 'rel' => 'noopener']
+        );
+        $actions[] = html_writer::link(
+            $url('cancel'),
+            get_string('participantcancel', 'local_evenements'),
+            ['class' => 'btn btn-sm btn-outline-warning']
+        );
     }
-    $actions[] = html_writer::link(new moodle_url($PAGE->url, ['action' => 'delete']),
-        get_string('participantdelete', 'local_evenements'), ['class' => 'btn btn-sm btn-outline-danger']);
+    $actions[] = html_writer::link(
+        new moodle_url($PAGE->url, ['action' => 'delete']),
+        get_string('participantdelete', 'local_evenements'),
+        ['class' => 'btn btn-sm btn-outline-danger']
+    );
     echo html_writer::div(html_writer::tag('dl', $dl, ['class' => 'evt-facts']) .
         html_writer::div(implode(' ', $actions), 'evt-factactions'), 'evt-panel evt-participant-head');
     if ($ticket->status === booking_manager::TICKET_CANCELLED) {
@@ -177,14 +203,6 @@ if ($ticket) {
 }
 
 $mform->display();
-if (!$ticket) {
-    // "Save and add another" sends the same form with one more flag.
-    $js = "(function(){var f=document.querySelector('form.mform');if(!f){return;}var b=f.querySelector('#id_submitbutton');" .
-        "if(!b){return;}var n=document.createElement('input');n.type='submit';n.name='addanother';n.value=" .
-        json_encode(get_string('participantaddanother', 'local_evenements')) . ";n.className='btn btn-secondary ms-2';" .
-        "b.parentNode.insertBefore(n,b.nextSibling);})();";
-    echo html_writer::script($js);
-}
 
 if ($ticket) {
     $history = participant_manager::get_log($id, 0, (int) $ticket->id);

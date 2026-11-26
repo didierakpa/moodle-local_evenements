@@ -90,18 +90,31 @@ if ($sessions) {
     $rows = '';
     foreach ($sessions as $session) {
         $booked = booking_manager::count_session_tickets((int) $session->id);
-        $rows .= html_writer::tag('tr',
+        $rows .= html_writer::tag(
+            'tr',
             html_writer::tag('td', html_writer::span(s(booking_manager::session_label($session)), 'evt-name')) .
             html_writer::tag('td', $booked . ($session->capacity ? ' / ' . $session->capacity : '')) .
-            html_writer::tag('td',
-                html_writer::link(new moodle_url($PAGE->url, ['s' => $session->id]), get_string('edit'),
-                    ['class' => 'btn btn-sm btn-outline-secondary me-1']) .
-                html_writer::link(new moodle_url($PAGE->url, ['action' => 'delete', 's' => $session->id,
-                    'sesskey' => sesskey()]), get_string('delete'), ['class' => 'btn btn-sm btn-outline-danger'])));
+            html_writer::tag(
+                'td',
+                html_writer::link(
+                    new moodle_url($PAGE->url, ['s' => $session->id]),
+                    get_string('edit'),
+                    ['class' => 'btn btn-sm btn-outline-secondary me-1']
+                ) .
+                html_writer::link(
+                    new moodle_url($PAGE->url, ['action' => 'delete', 's' => $session->id,
+                    'sesskey' => sesskey()]),
+                    get_string('delete'),
+                    ['class' => 'btn btn-sm btn-outline-danger']
+                )
+            )
+        );
     }
-    echo html_writer::tag('table', html_writer::tag('thead', html_writer::tag('tr',
+    echo html_writer::tag('table', html_writer::tag('thead', html_writer::tag(
+        'tr',
         html_writer::tag('th', get_string('tabsessions', 'local_evenements')) .
-        html_writer::tag('th', get_string('statticketsall', 'local_evenements')) . html_writer::tag('th', ''))) .
+        html_writer::tag('th', get_string('statticketsall', 'local_evenements')) . html_writer::tag('th', '')
+    )) .
         html_writer::tag('tbody', $rows), ['class' => 'evt-table mb-4']);
 } else {
     echo html_writer::div(get_string('nosessions', 'local_evenements'), 'evt-panel evt-empty mb-4');

@@ -25,13 +25,14 @@ namespace local_evenements;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class templates {
-
     /** @var array Model keys with colour, capacity, per-booking limit, weeks ahead and questions. */
     private const MODELS = [
         'jpo' => ['image' => 'jpo', 'color' => '#1d4e89', 'capacity' => 200, 'perbooking' => 5, 'weeks' => 10,
             'questions' => [['before', 'booking', 'choice', 1], ['after', 'booking', 'longtext', 0]]],
-        'graduation' => ['image' => 'graduation', 'color' => '#8a1c3c', 'capacity' => 150, 'perbooking' => 4, 'weeks' => 30, 'access' => 'list', 'guests' => 3,
-            'questions' => [['before', 'booking', 'choice', 0], ['before', 'booking', 'choice', 0], ['after', 'booking', 'longtext', 0]]],
+        'graduation' => ['image' => 'graduation', 'color' => '#8a1c3c', 'capacity' => 150, 'perbooking' => 4, 'weeks' => 30,
+            'access' => 'list', 'guests' => 3,
+            'questions' => [['before', 'booking', 'choice', 0], ['before', 'booking', 'choice', 0], ['after', 'booking',
+                'longtext', 0]]],
         'forum' => ['image' => 'forum', 'color' => '#2e7d32', 'capacity' => 80, 'perbooking' => 3, 'weeks' => 14,
             'questions' => [['before', 'booking', 'text', 1], ['after', 'booking', 'longtext', 0]]],
     ];

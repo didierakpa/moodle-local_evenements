@@ -72,7 +72,10 @@ if ($data = $mform->get_data()) {
 
 echo $OUTPUT->header();
 echo ui::event_header($event, 'moodleimport');
-echo html_writer::div(html_writer::link($back, '← ' . get_string($islist ? 'tabinvitees' : 'registrations', 'local_evenements')), 'mb-2');
+echo html_writer::div(html_writer::link($back, '← ' . get_string(
+    $islist ? 'tabinvitees' : 'registrations',
+    'local_evenements'
+)), 'mb-2');
 echo $OUTPUT->heading(get_string('mimporttitle', 'local_evenements'), 2);
 echo html_writer::tag('p', get_string($islist ? 'mimportintrolist' : 'mimportintro', 'local_evenements'), ['class' => 'evt-note']);
 
@@ -85,13 +88,21 @@ if ($preview !== null) {
             $items .= html_writer::tag('li', s(core_text::strtoupper($user->lastname) . ' ' . $user->firstname) .
                 ($user->email ? html_writer::span(' · ' . s($user->email), 'evt-psub d-inline') : ''));
         }
-        $more = count($preview) > 200 ? html_writer::tag('p', get_string('mimportmore', 'local_evenements', count($preview) - 200),
-            ['class' => 'evt-note']) : '';
-        echo html_writer::div(html_writer::tag('h3', get_string('mimportpreviewtitle', 'local_evenements',
-                (object) ['n' => count($preview), 'source' => s($sourcename)]), ['class' => 'h5']) .
+        $more = count($preview) > 200 ? html_writer::tag(
+            'p',
+            get_string('mimportmore', 'local_evenements', count($preview) - 200),
+            ['class' => 'evt-note']
+        ) : '';
+        echo html_writer::div(
+            html_writer::tag('h3', get_string(
+                'mimportpreviewtitle',
+                'local_evenements',
+                (object) ['n' => count($preview), 'source' => s($sourcename)]
+            ), ['class' => 'h5']) .
             html_writer::tag('ol', $items, ['class' => 'evt-previewlist']) . $more .
             html_writer::tag('p', get_string('mimportpreviewhelp', 'local_evenements'), ['class' => 'evt-note mb-0']),
-            'evt-panel mb-3');
+            'evt-panel mb-3'
+        );
     }
 }
 

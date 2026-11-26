@@ -50,10 +50,16 @@ foreach ($DB->get_records('local_evenements_answer', ['eventid' => $id], 'id ASC
 echo $OUTPUT->header();
 echo \local_evenements\output\ui::event_header($event, 'results');
 echo html_writer::div(
-    html_writer::link(new moodle_url('/local/evenements/export.php', ['id' => $id]),
-        get_string('exportcsv', 'local_evenements'), ['class' => 'btn btn-secondary me-2']) .
-    html_writer::link(new moodle_url('/local/evenements/questions.php', ['id' => $id]),
-        get_string('questionnaires', 'local_evenements'), ['class' => 'btn btn-outline-secondary']),
+    html_writer::link(
+        new moodle_url('/local/evenements/export.php', ['id' => $id]),
+        get_string('exportcsv', 'local_evenements'),
+        ['class' => 'btn btn-secondary me-2']
+    ) .
+    html_writer::link(
+        new moodle_url('/local/evenements/questions.php', ['id' => $id]),
+        get_string('questionnaires', 'local_evenements'),
+        ['class' => 'btn btn-outline-secondary']
+    ),
     'mb-3'
 );
 

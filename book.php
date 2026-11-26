@@ -22,6 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+// Public page: visitors and guests use it without a Moodle account (access by personal link or token).
+// phpcs:ignore moodle.Files.RequireLogin.Missing
 require_once(__DIR__ . '/../../config.php');
 
 use local_evenements\booking_manager;
@@ -77,8 +79,10 @@ if ($mform->is_cancelled()) {
         $guestanswers = [];
         foreach ($questions as $question) {
             if ($question->scope === 'guest') {
-                $guestanswers[$question->id] = booking_manager::clean_answer($question,
-                    $data->{'gq_' . $i . '_' . $question->id} ?? '');
+                $guestanswers[$question->id] = booking_manager::clean_answer(
+                    $question,
+                    $data->{'gq_' . $i . '_' . $question->id} ?? ''
+                );
             }
         }
         $guests[] = [
@@ -92,15 +96,25 @@ if ($mform->is_cancelled()) {
     $bookinganswers = [];
     foreach ($questions as $question) {
         if ($question->scope === 'booking') {
-            $bookinganswers[$question->id] = booking_manager::clean_answer($question,
-                $data->{'q_' . $question->id} ?? '');
+            $bookinganswers[$question->id] = booking_manager::clean_answer(
+                $question,
+                $data->{'q_' . $question->id} ?? ''
+            );
         }
     }
     $userid = (isloggedin() && !isguestuser()) ? (int) $USER->id : 0;
 
     try {
-        $booking = booking_manager::create_booking($event, trim($data->contactname), trim($data->email),
-            $userid, $guests, getremoteaddr(), $bookinganswers, (int) ($data->sessionid ?? 0));
+        $booking = booking_manager::create_booking(
+            $event,
+            trim($data->contactname),
+            trim($data->email),
+            $userid,
+            $guests,
+            getremoteaddr(),
+            $bookinganswers,
+            (int) ($data->sessionid ?? 0)
+        );
     } catch (moodle_exception $e) {
         $error = $e->getMessage();
     }
@@ -112,9 +126,12 @@ if ($mform->is_cancelled()) {
         } catch (Throwable $e) {
             debugging('local_evenements: confirmation e-mail failed: ' . $e->getMessage(), DEBUG_DEVELOPER);
         }
-        redirect(new moodle_url(booking_manager::booking_url($booking), ['new' => $sent ? 1 : 2]),
-            $sent ? '' : get_string('bookingdonenomail', 'local_evenements'), null,
-            \core\output\notification::NOTIFY_WARNING);
+        redirect(
+            new moodle_url(booking_manager::booking_url($booking), ['new' => $sent ? 1 : 2]),
+            $sent ? '' : get_string('bookingdonenomail', 'local_evenements'),
+            null,
+            \core\output\notification::NOTIFY_WARNING
+        );
     }
 } else if (isloggedin() && !isguestuser()) {
     // Prefill with the Moodle account.
@@ -139,7 +156,8 @@ echo html_writer::div(
     html_writer::div(html_writer::div(format_string($event->name), 'evt-strip-title') .
         \local_evenements\output\ui::meta($event)) .
     html_writer::span(get_string('ticketsn', 'local_evenements', $n), 'badge bg-primary text-white ms-auto'),
-    'evt-strip');
+    'evt-strip'
+);
 
 if ($error !== '') {
     echo $OUTPUT->notification($error, \core\output\notification::NOTIFY_ERROR);

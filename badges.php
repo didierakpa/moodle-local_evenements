@@ -122,8 +122,15 @@ if ($action === 'pdf' && confirm_sesskey()) {
         redirect($PAGE->url, get_string('badgenobody', 'local_evenements'), null, \core\output\notification::NOTIFY_WARNING);
     }
     $pdf = badge_pdf::generate($event, $people, optional_param('format', 'card', PARAM_ALPHA));
-    send_file($pdf, clean_filename('badges-' . format_string($event->name, true, ['escape' => false]) . '.pdf'), 0, 0, true, true,
-        'application/pdf');
+    send_file(
+        $pdf,
+        clean_filename('badges-' . format_string($event->name, true, ['escape' => false]) . '.pdf'),
+        0,
+        0,
+        true,
+        true,
+        'application/pdf'
+    );
 }
 
 $staff = $DB->get_records('local_evenements_staff', ['eventid' => $id], 'role ASC, name ASC');
@@ -144,15 +151,21 @@ $sample = html_writer::div(
         ($event->location ? ' · ' . s($event->location) : ''), 'evt-bp-info') .
     html_writer::div(html_writer::div('Marie', 'evt-bp-first') . html_writer::div('DUPONT', 'evt-bp-last'), 'evt-bp-name') .
     html_writer::div(get_string('badgerole_welcome', 'local_evenements'), 'evt-bp-role', ['style' => 'background:#2e7d32']),
-    'evt-bp');
+    'evt-bp'
+);
 
 // Generator.
 $sel = function (string $name, string $label, bool $checked, int $count) {
     return html_writer::div(
         html_writer::empty_tag('input', ['type' => 'checkbox', 'name' => $name, 'value' => 1, 'id' => 'evt-' . $name,
             'class' => 'form-check-input'] + ($checked ? ['checked' => 'checked'] : [])) .
-        html_writer::tag('label', $label . ' ' . html_writer::span((string) $count, 'evt-nav-badge'),
-            ['for' => 'evt-' . $name, 'class' => 'form-check-label']), 'form-check');
+        html_writer::tag(
+            'label',
+            $label . ' ' . html_writer::span((string) $count, 'evt-nav-badge'),
+            ['for' => 'evt-' . $name, 'class' => 'form-check-label']
+        ),
+        'form-check'
+    );
 };
 $catopts = [0 => get_string('badgeallcategories', 'local_evenements')];
 foreach ($categories as $c) {
@@ -168,23 +181,47 @@ $form .= $sel('src_operators', get_string('badgesrc_operators', 'local_evenement
 $form .= $sel('src_organisers', get_string('badgesrc_organisers', 'local_evenements'), true, $norg);
 $form .= $sel('src_guests', get_string('badgesrc_guests', 'local_evenements'), false, $ntickets);
 $form .= html_writer::div(
-    html_writer::tag('label', get_string('badgeguestcat', 'local_evenements'), ['for' => 'evt-cat', 'class' => 'form-label small']) .
+    html_writer::tag('label', get_string('badgeguestcat', 'local_evenements'), ['for' => 'evt-cat',
+        'class' => 'form-label small']) .
     html_writer::select($catopts, 'cat', 0, false, ['id' => 'evt-cat', 'class' => 'form-select form-select-sm']) .
-    html_writer::div(html_writer::empty_tag('input', ['type' => 'checkbox', 'name' => 'qr', 'value' => 1, 'id' => 'evt-qr',
-        'class' => 'form-check-input']) . html_writer::tag('label', get_string('badgewithqr', 'local_evenements'),
-        ['for' => 'evt-qr', 'class' => 'form-check-label small']), 'form-check mt-1'), 'ms-4 mb-2');
+    html_writer::div(
+        html_writer::empty_tag('input', ['type' => 'checkbox', 'name' => 'qr', 'value' => 1, 'id' => 'evt-qr',
+        'class' => 'form-check-input']) . html_writer::tag(
+            'label',
+            get_string('badgewithqr', 'local_evenements'),
+            ['for' => 'evt-qr', 'class' => 'form-check-label small']
+        ),
+        'form-check mt-1'
+    ),
+    'ms-4 mb-2'
+);
 $form .= html_writer::div(
     html_writer::tag('label', get_string('badgeblank', 'local_evenements'), ['for' => 'evt-blank', 'class' => 'form-label small']) .
     html_writer::div(
         html_writer::empty_tag('input', ['type' => 'number', 'name' => 'blank', 'id' => 'evt-blank', 'value' => 0, 'min' => 0,
             'max' => 40, 'class' => 'form-control form-control-sm', 'style' => 'max-width:90px']) .
         html_writer::empty_tag('input', ['type' => 'text', 'name' => 'blankrole', 'class' => 'form-control form-control-sm',
-            'placeholder' => get_string('badgerolelabel', 'local_evenements')]), 'input-group input-group-sm'), 'mb-3');
+        'placeholder' => get_string(
+            'badgerolelabel',
+            'local_evenements'
+        )]),
+        'input-group input-group-sm'
+    ),
+    'mb-3'
+);
 $form .= html_writer::div(
-    html_writer::tag('label', get_string('badgeformat', 'local_evenements'), ['for' => 'evt-format', 'class' => 'form-label small']) .
-    html_writer::select(['card' => get_string('badgeformat_card', 'local_evenements'),
-        'a6' => get_string('badgeformat_a6', 'local_evenements')], 'format', 'card', false,
-        ['id' => 'evt-format', 'class' => 'form-select form-select-sm']), 'mb-3');
+    html_writer::tag('label', get_string('badgeformat', 'local_evenements'), ['for' => 'evt-format',
+        'class' => 'form-label small']) .
+    html_writer::select(
+        ['card' => get_string('badgeformat_card', 'local_evenements'),
+        'a6' => get_string('badgeformat_a6', 'local_evenements')],
+        'format',
+        'card',
+        false,
+        ['id' => 'evt-format', 'class' => 'form-select form-select-sm']
+    ),
+    'mb-3'
+);
 $form .= html_writer::tag('p', get_string('badgeformathelp', 'local_evenements'), ['class' => 'evt-note']);
 $form .= html_writer::tag('button', html_writer::tag('i', '', ['class' => 'fa-solid fa-id-badge', 'aria-hidden' => 'true']) . ' ' .
     get_string('badgedownload', 'local_evenements'), ['type' => 'submit', 'class' => 'btn btn-primary']);
@@ -194,19 +231,32 @@ echo html_writer::div(
     html_writer::div($form, 'evt-panel') .
     html_writer::div(html_writer::tag('h2', get_string('badgepreview', 'local_evenements'), ['class' => 'h5']) . $sample .
         html_writer::tag('p', get_string('badgecolorshelp', 'local_evenements'), ['class' => 'evt-note mt-2']), 'evt-panel'),
-    'evt-badge-grid mb-4');
+    'evt-badge-grid mb-4'
+);
 
 // Team list.
 echo html_writer::tag('h2', get_string('badgeteam', 'local_evenements'), ['class' => 'h5']);
 if ($staff) {
     $rows = '';
     foreach ($staff as $s) {
-        $rows .= html_writer::tag('tr',
+        $rows .= html_writer::tag(
+            'tr',
             html_writer::tag('td', s($s->name)) .
-            html_writer::tag('td', html_writer::span(s($s->role), 'evt-role-chip',
-                ['style' => 'background:rgb(' . implode(',', badge_pdf::role_color($s->role, \local_evenements\ticket_pdf::hex_to_rgb($color))) . ')'])) .
-            html_writer::tag('td', html_writer::link(new moodle_url($PAGE->url, ['action' => 'delstaff', 's' => $s->id,
-                'sesskey' => sesskey()]), get_string('remove', 'local_evenements'), ['class' => 'btn btn-sm btn-outline-danger'])));
+            html_writer::tag('td', html_writer::span(
+                s($s->role),
+                'evt-role-chip',
+                ['style' => 'background:rgb(' . implode(',', badge_pdf::role_color(
+                    $s->role,
+                    \local_evenements\ticket_pdf::hex_to_rgb($color)
+                )) . ')']
+            )) .
+            html_writer::tag('td', html_writer::link(
+                new moodle_url($PAGE->url, ['action' => 'delstaff', 's' => $s->id,
+                'sesskey' => sesskey()]),
+                get_string('remove', 'local_evenements'),
+                ['class' => 'btn btn-sm btn-outline-danger']
+            ))
+        );
     }
     echo html_writer::tag('table', html_writer::tag('tbody', $rows), ['class' => 'evt-table mb-3']);
 } else {
@@ -219,10 +269,18 @@ $f1 .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'action', 
 $f1 .= html_writer::tag('h3', get_string('badgeaddone', 'local_evenements'), ['class' => 'h6']);
 $f1 .= html_writer::div(
     html_writer::empty_tag('input', ['type' => 'text', 'name' => 'name', 'required' => 'required', 'class' => 'form-control',
-        'placeholder' => get_string('badgenameph', 'local_evenements'), 'aria-label' => get_string('badgenameph', 'local_evenements')]) .
+        'placeholder' => get_string('badgenameph', 'local_evenements'), 'aria-label' => get_string(
+            'badgenameph',
+            'local_evenements'
+        )]) .
     html_writer::empty_tag('input', ['type' => 'text', 'name' => 'role', 'class' => 'form-control', 'list' => 'evt-roles',
-        'placeholder' => get_string('badgerolelabel', 'local_evenements'), 'aria-label' => get_string('badgerolelabel', 'local_evenements')]) .
-    html_writer::tag('button', get_string('add'), ['type' => 'submit', 'class' => 'btn btn-primary']), 'input-group');
+        'placeholder' => get_string('badgerolelabel', 'local_evenements'), 'aria-label' => get_string(
+            'badgerolelabel',
+            'local_evenements'
+        )]) .
+    html_writer::tag('button', get_string('add'), ['type' => 'submit', 'class' => 'btn btn-primary']),
+    'input-group'
+);
 $roles = ['Organisation', 'Staff', 'Accueil', 'Bénévole', 'Intervenant', 'Presse', 'VIP', 'Sécurité'];
 $f1 .= html_writer::tag('datalist', implode('', array_map(function ($r) {
     return html_writer::tag('option', '', ['value' => $r]);
@@ -234,12 +292,16 @@ $f2 .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey',
 $f2 .= html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'action', 'value' => 'bulkstaff']);
 $f2 .= html_writer::tag('h3', get_string('badgeaddmany', 'local_evenements'), ['class' => 'h6']);
 $f2 .= html_writer::tag('textarea', '', ['name' => 'bulk', 'rows' => 5, 'class' => 'form-control mb-2',
-    'placeholder' => "Claire MARTIN ; Accueil\nPaul DURAND ; Bénévole\nSophie LEROY", 'aria-label' => get_string('badgeaddmany', 'local_evenements')]);
+    'placeholder' => "Claire MARTIN ; Accueil\nPaul DURAND ; Bénévole\nSophie LEROY", 'aria-label' => get_string(
+        'badgeaddmany',
+        'local_evenements'
+    )]);
 $f2 .= html_writer::div(
     html_writer::empty_tag('input', ['type' => 'text', 'name' => 'bulkrole', 'class' => 'form-control',
         'placeholder' => get_string('badgebulkrole', 'local_evenements')]) .
     html_writer::tag('button', get_string('badgeimport', 'local_evenements'), ['type' => 'submit', 'class' => 'btn btn-primary']),
-    'input-group');
+    'input-group'
+);
 $f2 .= html_writer::end_tag('form');
 echo html_writer::div($f1 . $f2, 'evt-badge-grid');
 

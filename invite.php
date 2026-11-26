@@ -22,6 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+// Public page: visitors and guests use it without a Moodle account (access by personal link or token).
+// phpcs:ignore moodle.Files.RequireLogin.Missing
 require_once(__DIR__ . '/../../config.php');
 
 use local_evenements\booking_manager;
@@ -69,8 +71,11 @@ $header = function () use ($OUTPUT, $event, $invitee, $fullname) {
     echo $OUTPUT->header();
     echo html_writer::div(
         \local_evenements\output\ui::date_badge($event) .
-        html_writer::div(html_writer::div(format_string($event->name), 'evt-strip-title') . \local_evenements\output\ui::meta($event)),
-        'evt-strip');
+        html_writer::div(html_writer::div(format_string($event->name), 'evt-strip-title') . \local_evenements\output\ui::meta(
+            $event
+        )),
+        'evt-strip'
+    );
 };
 
 if (!booking_manager::is_open($event)) {
@@ -104,13 +109,22 @@ if (!$invitee->timeconfirmed) {
         html_writer::tag('p', s(trim(($categories[$invitee->tickettypeid]->name ?? '') .
             ($invitee->detail ? ' · ' . $invitee->detail : ''))), ['class' => 'lead']) .
         html_writer::tag('p', get_string('invconfirmask', 'local_evenements'), ['class' => 'mb-3']) .
-        html_writer::start_tag('form', ['method' => 'post', 'action' => $PAGE->url->out(false), 'class' => 'd-flex flex-wrap gap-2']) .
+        html_writer::start_tag('form', ['method' => 'post', 'action' => $PAGE->url->out(false),
+            'class' => 'd-flex flex-wrap gap-2']) .
         html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]) .
-        html_writer::tag('button', get_string('invconfirmyes', 'local_evenements'),
-            ['type' => 'submit', 'name' => 'action', 'value' => 'confirm', 'class' => 'btn btn-primary']) .
-        html_writer::tag('button', get_string('invconfirmno', 'local_evenements'),
-            ['type' => 'submit', 'name' => 'action', 'value' => 'wrong', 'class' => 'btn btn-outline-secondary']) .
-        html_writer::end_tag('form'), 'evt-panel');
+        html_writer::tag(
+            'button',
+            get_string('invconfirmyes', 'local_evenements'),
+            ['type' => 'submit', 'name' => 'action', 'value' => 'confirm', 'class' => 'btn btn-primary']
+        ) .
+        html_writer::tag(
+            'button',
+            get_string('invconfirmno', 'local_evenements'),
+            ['type' => 'submit', 'name' => 'action', 'value' => 'wrong', 'class' => 'btn btn-outline-secondary']
+        ) .
+        html_writer::end_tag('form'),
+        'evt-panel'
+    );
     echo $OUTPUT->footer();
     exit;
 }
@@ -144,8 +158,17 @@ if ($mform->is_cancelled()) {
         $answers[$question->id] = booking_manager::clean_answer($question, $data->{'q_' . $question->id} ?? '');
     }
     try {
-        $booking = booking_manager::create_booking($event, $fullname, $invitee->email, 0, $guests, getremoteaddr(), $answers,
-            (int) ($data->sessionid ?? 0), $invitee);
+        $booking = booking_manager::create_booking(
+            $event,
+            $fullname,
+            $invitee->email,
+            0,
+            $guests,
+            getremoteaddr(),
+            $answers,
+            (int) ($data->sessionid ?? 0),
+            $invitee
+        );
     } catch (moodle_exception $e) {
         $error = $e->getMessage();
         if ($e->errorcode === 'invitealreadybooked') {
@@ -163,16 +186,21 @@ if ($mform->is_cancelled()) {
         } catch (Throwable $e) {
             debugging('local_evenements: confirmation e-mail failed: ' . $e->getMessage(), DEBUG_DEVELOPER);
         }
-        redirect(new moodle_url(booking_manager::booking_url($booking), ['new' => $sent ? 1 : 2]),
-            $sent ? '' : get_string('bookingdonenomail', 'local_evenements'), null,
-            \core\output\notification::NOTIFY_WARNING);
+        redirect(
+            new moodle_url(booking_manager::booking_url($booking), ['new' => $sent ? 1 : 2]),
+            $sent ? '' : get_string('bookingdonenomail', 'local_evenements'),
+            null,
+            \core\output\notification::NOTIFY_WARNING
+        );
     }
 }
 
 $header();
 echo html_writer::div(
     html_writer::tag('p', get_string('invstep2', 'local_evenements', s($fullname)), ['class' => 'mb-0']) .
-    html_writer::tag('p', get_string('invstep2note', 'local_evenements'), ['class' => 'evt-note mb-0']), 'evt-panel mb-3');
+    html_writer::tag('p', get_string('invstep2note', 'local_evenements'), ['class' => 'evt-note mb-0']),
+    'evt-panel mb-3'
+);
 if ($error !== '') {
     echo $OUTPUT->notification($error, \core\output\notification::NOTIFY_ERROR);
 }

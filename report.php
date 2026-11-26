@@ -59,7 +59,8 @@ if ($r && $r->snapshot) {
     $intro = get_string('reportprovisional', 'local_evenements');
 }
 $printbtn = html_writer::tag('button', html_writer::tag('i', '', ['class' => 'fa-solid fa-print me-1', 'aria-hidden' => 'true']) .
-    get_string('reportprint', 'local_evenements'), ['type' => 'button', 'class' => 'btn btn-secondary btn-sm', 'onclick' => 'window.print()']);
+    get_string('reportprint', 'local_evenements'), ['type' => 'button', 'class' => 'btn btn-secondary btn-sm',
+        'data-evt-print' => '1']);
 echo html_writer::div(html_writer::tag('p', $intro, ['class' => 'evt-note mb-0']) . $printbtn, 'evt-reporthead');
 
 if (!$r || !$r->booked) {
@@ -68,15 +69,8 @@ if (!$r || !$r->booked) {
     exit;
 }
 
-/**
- * Difference with the previous edition, as a small coloured text.
- *
- * @param int|float|null $now
- * @param int|float|null $before
- * @param string $unit '' or '%'
- * @param bool $lowerisbetter Green when the figure goes down (absent people)
- * @return string
- */
+// Difference with the previous edition, as a small coloured text ($unit '' or '%';
+// $lowerisbetter: green when the figure goes down, as for absent people).
 $delta = function ($now, $before, string $unit = '', bool $lowerisbetter = false) use ($p): string {
     if (!$p || $now === null || $before === null) {
         return '';
@@ -101,7 +95,11 @@ $tiles = [
         $delta($r->booked, $p->booked ?? null)],
     [$r->attended, get_string('reportattended', 'local_evenements'),
         $rate !== null ? get_string('attendancepercent', 'local_evenements', $rate) : '', $delta($rate, $prate, '%')],
-    [$noshow, get_string('reportnoshow', 'local_evenements'), $r->cancelled ? get_string('cancelledcount', 'local_evenements', $r->cancelled) : '',
+    [$noshow, get_string('reportnoshow', 'local_evenements'), $r->cancelled ? get_string(
+        'cancelledcount',
+        'local_evenements',
+        $r->cancelled
+    ) : '',
         $delta($noshow, $p ? $p->booked - $p->attended : null, '', true)],
     [$waitlisted, get_string('reportwaitlist', 'local_evenements'),
         $waitlisted ? get_string('reportwaitlistbooked', 'local_evenements', (int) ($r->waitlist['booked'] ?? 0)) : '', ''],
@@ -124,17 +122,13 @@ if ($p) {
     ]), ['class' => 'evt-note']);
 }
 if (!$r->snapshot && $noshow > 0 && $event->timestart < time()) {
-    echo html_writer::div(html_writer::link(new moodle_url('/local/evenements/registrations.php', ['id' => $id, 'st' => 'valid']),
-        get_string('reportseenoshow', 'local_evenements')), 'mb-3');
+    echo html_writer::div(html_writer::link(
+        new moodle_url('/local/evenements/registrations.php', ['id' => $id, 'st' => 'valid']),
+        get_string('reportseenoshow', 'local_evenements')
+    ), 'mb-3');
 }
 
-/**
- * Table "booked / present / rate" for categories or time slots.
- *
- * @param array $rows
- * @param string $title
- * @return string
- */
+// Table "booked / present / rate" for categories or time slots.
 $attendancetable = function (array $rows, string $title): string {
     $table = new html_table();
     $table->head = [$title, get_string('reportbooked', 'local_evenements'), get_string('reportattended', 'local_evenements'),
@@ -143,7 +137,10 @@ $attendancetable = function (array $rows, string $title): string {
     foreach ($rows as $row) {
         $row = (array) $row;
         $pct = report_manager::percent($row['attended'], $row['booked']);
-        $bar = $pct !== null ? html_writer::div(html_writer::div('', 'evt-bar-fill', ['style' => 'width:' . $pct . '%']), 'evt-bar') : '';
+        $bar = $pct !== null ? html_writer::div(
+            html_writer::div('', 'evt-bar-fill', ['style' => 'width:' . $pct . '%']),
+            'evt-bar'
+        ) : '';
         $table->data[] = [s($row['name']), (int) $row['booked'], (int) $row['attended'],
             html_writer::div(($pct !== null ? $pct . ' %' : '-') . $bar, 'evt-ratecell')];
     }
@@ -170,7 +167,8 @@ if ($r->arrivals) {
     $arrivals = [];
     $slots = array_map('intval', array_keys($r->arrivals));
     for ($t = min($slots); $t <= max($slots); $t += report_manager::ARRIVAL_STEP) {
-        $arrivals[userdate($t, get_string('strftimetime', 'langconfig'))] = (int) ($r->arrivals[$t] ?? $r->arrivals[(string) $t] ?? 0);
+        $label = userdate($t, get_string('strftimetime', 'langconfig'));
+        $arrivals[$label] = (int) ($r->arrivals[$t] ?? $r->arrivals[(string) $t] ?? 0);
     }
     $peak = array_search(max($arrivals), $arrivals);
     $chart = new \core\chart_bar();
@@ -178,8 +176,11 @@ if ($r->arrivals) {
     $chart->set_labels(array_keys($arrivals));
     $chart->set_legend_options(['display' => false]);
     echo html_writer::div(html_writer::tag('h2', get_string('reportarrivals', 'local_evenements')) .
-        html_writer::tag('p', get_string('reportpeak', 'local_evenements', (object) ['time' => $peak, 'count' => $arrivals[$peak]]),
-            ['class' => 'evt-note']) . $OUTPUT->render($chart), 'evt-panel mt-3');
+        html_writer::tag(
+            'p',
+            get_string('reportpeak', 'local_evenements', (object) ['time' => $peak, 'count' => $arrivals[$peak]]),
+            ['class' => 'evt-note']
+        ) . $OUTPUT->render($chart), 'evt-panel mt-3');
 }
 
 // Booking curve, compared with the previous edition.
@@ -202,8 +203,11 @@ if ($r->curve) {
     $chart->set_labels($labels);
     $week = (int) ($r->curve[7] ?? $r->curve['7'] ?? 0);
     echo html_writer::div(html_writer::tag('h2', get_string('reportcurve', 'local_evenements')) .
-        html_writer::tag('p', get_string('reportcurvehelp', 'local_evenements', $r->booked ? report_manager::percent($week, $r->booked) : 0),
-            ['class' => 'evt-note']) . $OUTPUT->render($chart), 'evt-panel mt-3');
+        html_writer::tag(
+            'p',
+            get_string('reportcurvehelp', 'local_evenements', $r->booked ? report_manager::percent($week, $r->booked) : 0),
+            ['class' => 'evt-note']
+        ) . $OUTPUT->render($chart), 'evt-panel mt-3');
 }
 
 // Door team and incidents.
@@ -211,17 +215,25 @@ if ($r->operators || $r->refused || $r->alreadyused) {
     $list = '';
     foreach ($r->operators as $door) {
         $door = (array) $door;
-        $list .= html_writer::tag('li', html_writer::span(s($door['name'])) . html_writer::span((int) $door['count'], 'evt-badge evt-badge-open ms-2'));
+        $list .= html_writer::tag('li', html_writer::span(s($door['name'])) . html_writer::span(
+            (int) $door['count'],
+            'evt-badge evt-badge-open ms-2'
+        ));
     }
-    $incidents = html_writer::tag('ul',
+    $incidents = html_writer::tag(
+        'ul',
         html_writer::tag('li', get_string('reportrefused', 'local_evenements', (int) $r->refused)) .
-        html_writer::tag('li', get_string('reportalreadyused', 'local_evenements', (int) $r->alreadyused)), ['class' => 'evt-meta']);
+        html_writer::tag('li', get_string('reportalreadyused', 'local_evenements', (int) $r->alreadyused)),
+        ['class' => 'evt-meta']
+    );
     echo html_writer::div(html_writer::tag('h2', get_string('reportdoor', 'local_evenements')) .
         html_writer::div(
             html_writer::div(html_writer::tag('h3', get_string('entrancebyoperator', 'local_evenements'), ['class' => 'h6']) .
                 ($list ? html_writer::tag('ul', $list, ['class' => 'evt-meta']) : '-')) .
-            html_writer::div(html_writer::tag('h3', get_string('reportincidents', 'local_evenements'), ['class' => 'h6']) . $incidents),
-            'evt-reportcols'), 'evt-panel mt-3');
+            html_writer::div(html_writer::tag('h3', get_string('reportincidents', 'local_evenements'), ['class' => 'h6'])
+                . $incidents),
+            'evt-reportcols'
+        ), 'evt-panel mt-3');
 }
 
 echo $OUTPUT->footer();

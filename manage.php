@@ -48,8 +48,12 @@ $PAGE->set_heading('');
 // Duplication.
 if ($action === 'duplicate' && $id && $ismanager && confirm_sesskey()) {
     $newid = booking_manager::duplicate_event($id);
-    redirect(new moodle_url('/local/evenements/edit.php', ['id' => $newid]),
-        get_string('eventduplicated', 'local_evenements'), null, \core\output\notification::NOTIFY_SUCCESS);
+    redirect(
+        new moodle_url('/local/evenements/edit.php', ['id' => $newid]),
+        get_string('eventduplicated', 'local_evenements'),
+        null,
+        \core\output\notification::NOTIFY_SUCCESS
+    );
 }
 
 // New event from a ready-made model.
@@ -57,8 +61,12 @@ if ($action === 'fromtemplate' && $ismanager && confirm_sesskey()) {
     $key = required_param('model', PARAM_ALPHANUMEXT);
     if (in_array($key, \local_evenements\templates::keys(), true)) {
         $newid = \local_evenements\templates::create_event($key);
-        redirect(new moodle_url('/local/evenements/dashboard.php', ['id' => $newid]),
-            get_string('eventfromtemplate', 'local_evenements'), null, \core\output\notification::NOTIFY_SUCCESS);
+        redirect(
+            new moodle_url('/local/evenements/dashboard.php', ['id' => $newid]),
+            get_string('eventfromtemplate', 'local_evenements'),
+            null,
+            \core\output\notification::NOTIFY_SUCCESS
+        );
     }
 }
 
@@ -67,8 +75,12 @@ if ($action === 'delete' && $id && $ismanager) {
     $event = booking_manager::get_event($id);
     if (optional_param('confirm', 0, PARAM_BOOL) && confirm_sesskey()) {
         booking_manager::delete_event($id);
-        redirect($PAGE->url, get_string('eventdeleted', 'local_evenements'), null,
-            \core\output\notification::NOTIFY_SUCCESS);
+        redirect(
+            $PAGE->url,
+            get_string('eventdeleted', 'local_evenements'),
+            null,
+            \core\output\notification::NOTIFY_SUCCESS
+        );
     }
     echo $OUTPUT->header();
     echo $OUTPUT->confirm(
@@ -123,16 +135,30 @@ echo html_writer::div(
     html_writer::div(html_writer::tag('h1', get_string('organiserspace', 'local_evenements')) .
         html_writer::tag('p', get_string('organiserintro', 'local_evenements')), 'evt-pagehead mb-0') .
     html_writer::div(
-        ($ismanager ? html_writer::link(new moodle_url('/local/evenements/edit.php'),
-            '+ ' . get_string('createevent', 'local_evenements'), ['class' => 'btn btn-primary btn-lg']) : '') .
-        html_writer::link(new moodle_url('/local/evenements/scan.php'), get_string('scan', 'local_evenements'),
-            ['class' => 'btn btn-outline-secondary']) .
-        html_writer::link(new moodle_url('/local/evenements/index.php'), get_string('publicpage', 'local_evenements'),
-            ['class' => 'btn btn-outline-secondary']) .
-        ($ismanager ? html_writer::link(new moodle_url('/local/evenements/preferences.php'),
-            get_string('generalsettings', 'local_evenements'), ['class' => 'btn btn-outline-secondary']) : ''),
-        'd-flex flex-wrap gap-2 align-items-center'),
-    'd-flex flex-wrap justify-content-between align-items-center gap-3 mb-4');
+        ($ismanager ? html_writer::link(
+            new moodle_url('/local/evenements/edit.php'),
+            '+ ' . get_string('createevent', 'local_evenements'),
+            ['class' => 'btn btn-primary btn-lg']
+        ) : '') .
+        html_writer::link(
+            new moodle_url('/local/evenements/scan.php'),
+            get_string('scan', 'local_evenements'),
+            ['class' => 'btn btn-outline-secondary']
+        ) .
+        html_writer::link(
+            new moodle_url('/local/evenements/index.php'),
+            get_string('publicpage', 'local_evenements'),
+            ['class' => 'btn btn-outline-secondary']
+        ) .
+        ($ismanager ? html_writer::link(
+            new moodle_url('/local/evenements/preferences.php'),
+            get_string('generalsettings', 'local_evenements'),
+            ['class' => 'btn btn-outline-secondary']
+        ) : ''),
+        'd-flex flex-wrap gap-2 align-items-center'
+    ),
+    'd-flex flex-wrap justify-content-between align-items-center gap-3 mb-4'
+);
 
 $totalbooked = 0;
 $opencount = 0;
@@ -157,8 +183,11 @@ echo html_writer::end_div();
 if (!$allevents) {
     echo html_writer::div(html_writer::tag('h2', get_string('noeventsyet', 'local_evenements')) .
         html_writer::tag('p', get_string('noeventshelp', 'local_evenements'), ['class' => 'evt-note']) .
-        html_writer::link(new moodle_url('/local/evenements/edit.php'), '+ ' . get_string('createevent', 'local_evenements'),
-            ['class' => 'btn btn-primary btn-lg']), 'evt-panel text-center py-5');
+        html_writer::link(
+            new moodle_url('/local/evenements/edit.php'),
+            '+ ' . get_string('createevent', 'local_evenements'),
+            ['class' => 'btn btn-primary btn-lg']
+        ), 'evt-panel text-center py-5');
 }
 
 $cards = '';
@@ -166,12 +195,16 @@ foreach (\local_evenements\templates::keys() as $key) {
     $cards .= html_writer::div(
         html_writer::tag('strong', get_string('tpl_' . $key . '_name', 'local_evenements')) .
         html_writer::div(get_string('tpl_' . $key . '_short', 'local_evenements'), 'evt-note') .
-        html_writer::link(new moodle_url($PAGE->url, ['action' => 'fromtemplate', 'model' => $key, 'sesskey' => sesskey()]),
-            get_string('usemodel', 'local_evenements'), ['class' => 'btn btn-sm btn-outline-primary mt-2']),
-        'evt-model');
+        html_writer::link(
+            new moodle_url($PAGE->url, ['action' => 'fromtemplate', 'model' => $key, 'sesskey' => sesskey()]),
+            get_string('usemodel', 'local_evenements'),
+            ['class' => 'btn btn-sm btn-outline-primary mt-2']
+        ),
+        'evt-model'
+    );
 }
 if ($ismanager) {
-echo html_writer::div(html_writer::tag('h2', get_string('startfrommodel', 'local_evenements')) .
+    echo html_writer::div(html_writer::tag('h2', get_string('startfrommodel', 'local_evenements')) .
     html_writer::tag('p', get_string('startfrommodelhelp', 'local_evenements'), ['class' => 'evt-note']) .
     html_writer::div($cards, 'evt-models'), 'evt-panel mb-4', ['id' => 'models']);
 }
@@ -179,16 +212,20 @@ echo html_writer::div(html_writer::tag('h2', get_string('startfrommodel', 'local
 if ($allevents) {
     $tabs = '';
     foreach (['all', 'open', 'draft', 'closed', 'past'] as $f) {
-        $tabs .= html_writer::link(new moodle_url($PAGE->url, ['filter' => $f, 'q' => $query]),
+        $tabs .= html_writer::link(
+            new moodle_url($PAGE->url, ['filter' => $f, 'q' => $query]),
             get_string('filter_' . $f, 'local_evenements') . html_writer::tag('small', $counts[$f]),
-            ['class' => 'evt-filter' . ($filter === $f ? ' is-active' : '')]);
+            ['class' => 'evt-filter' . ($filter === $f ? ' is-active' : '')]
+        );
     }
-    $searchform = html_writer::tag('form',
+    $searchform = html_writer::tag(
+        'form',
         html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'filter', 'value' => $filter]) .
         html_writer::empty_tag('input', ['type' => 'search', 'name' => 'q', 'value' => $query,
             'class' => 'form-control form-control-sm', 'placeholder' => get_string('searchevents', 'local_evenements'),
             'aria-label' => get_string('searchevents', 'local_evenements')]),
-        ['method' => 'get', 'action' => $PAGE->url->out(false)]);
+        ['method' => 'get', 'action' => $PAGE->url->out(false)]
+    );
     echo html_writer::div($tabs . $searchform, 'evt-filters');
     if (!$events) {
         echo html_writer::div(get_string('noeventsfilter', 'local_evenements'), 'evt-panel evt-empty');
@@ -210,47 +247,81 @@ foreach ($events as $event) {
     $booked = $event->capacity ? $count . ' / ' . $event->capacity : (string) $count;
 
     $mainlinks = [
-        html_writer::link(new moodle_url('/local/evenements/dashboard.php', ['id' => $event->id]),
-            get_string('opendashboard', 'local_evenements'), ['class' => 'btn btn-sm btn-primary']),
+        html_writer::link(
+            new moodle_url('/local/evenements/dashboard.php', ['id' => $event->id]),
+            get_string('opendashboard', 'local_evenements'),
+            ['class' => 'btn btn-sm btn-primary']
+        ),
     ];
     $more = [
-        html_writer::link(new moodle_url('/local/evenements/event.php', ['id' => $event->id]),
-            get_string('preview', 'local_evenements'), ['class' => 'dropdown-item']),
+        html_writer::link(
+            new moodle_url('/local/evenements/event.php', ['id' => $event->id]),
+            get_string('preview', 'local_evenements'),
+            ['class' => 'dropdown-item']
+        ),
     ];
     if (true) {
-        $mainlinks[] = html_writer::link(new moodle_url('/local/evenements/registrations.php', ['id' => $event->id]),
-            get_string('registrations', 'local_evenements'), ['class' => 'btn btn-sm btn-outline-secondary']);
-        $more[] = html_writer::link(new moodle_url('/local/evenements/export.php', ['id' => $event->id]),
-            get_string('exportcsv', 'local_evenements'), ['class' => 'dropdown-item']);
+        $mainlinks[] = html_writer::link(
+            new moodle_url('/local/evenements/registrations.php', ['id' => $event->id]),
+            get_string('registrations', 'local_evenements'),
+            ['class' => 'btn btn-sm btn-outline-secondary']
+        );
+        $more[] = html_writer::link(
+            new moodle_url('/local/evenements/export.php', ['id' => $event->id]),
+            get_string('exportcsv', 'local_evenements'),
+            ['class' => 'dropdown-item']
+        );
     }
-    $more[] = html_writer::link(new moodle_url('/local/evenements/questions.php', ['id' => $event->id]),
-        get_string('questionnaires', 'local_evenements'), ['class' => 'dropdown-item']);
+    $more[] = html_writer::link(
+        new moodle_url('/local/evenements/questions.php', ['id' => $event->id]),
+        get_string('questionnaires', 'local_evenements'),
+        ['class' => 'dropdown-item']
+    );
     if (true) {
-        $more[] = html_writer::link(new moodle_url('/local/evenements/results.php', ['id' => $event->id]),
-            get_string('results', 'local_evenements'), ['class' => 'dropdown-item']);
+        $more[] = html_writer::link(
+            new moodle_url('/local/evenements/results.php', ['id' => $event->id]),
+            get_string('results', 'local_evenements'),
+            ['class' => 'dropdown-item']
+        );
     }
-    $more[] = html_writer::link(new moodle_url('/local/evenements/message.php', ['id' => $event->id]),
-        get_string('sendmessage', 'local_evenements'), ['class' => 'dropdown-item']);
+    $more[] = html_writer::link(
+        new moodle_url('/local/evenements/message.php', ['id' => $event->id]),
+        get_string('sendmessage', 'local_evenements'),
+        ['class' => 'dropdown-item']
+    );
     if ($ismanager) {
-        $more[] = html_writer::link(new moodle_url($PAGE->url,
-            ['action' => 'duplicate', 'id' => $event->id, 'sesskey' => sesskey()]),
-            get_string('duplicate', 'local_evenements'), ['class' => 'dropdown-item']);
-        $more[] = html_writer::link(new moodle_url($PAGE->url, ['action' => 'delete', 'id' => $event->id]),
-            get_string('delete'), ['class' => 'dropdown-item text-danger']);
+        $more[] = html_writer::link(
+            new moodle_url(
+                $PAGE->url,
+                ['action' => 'duplicate', 'id' => $event->id, 'sesskey' => sesskey()]
+            ),
+            get_string('duplicate', 'local_evenements'),
+            ['class' => 'dropdown-item']
+        );
+        $more[] = html_writer::link(
+            new moodle_url($PAGE->url, ['action' => 'delete', 'id' => $event->id]),
+            get_string('delete'),
+            ['class' => 'dropdown-item text-danger']
+        );
     }
     $mainlinks[] = html_writer::div(
         html_writer::tag('button', get_string('moreactions', 'local_evenements'), ['type' => 'button',
             'class' => 'btn btn-sm btn-outline-secondary dropdown-toggle', 'data-bs-toggle' => 'dropdown',
             'aria-expanded' => 'false']) .
-        html_writer::div(implode('', $more), 'dropdown-menu'), 'dropdown d-inline-block');
+        html_writer::div(implode('', $more), 'dropdown-menu'),
+        'dropdown d-inline-block'
+    );
     $links = $mainlinks;
 
     $table->data[] = [
-        html_writer::link(new moodle_url('/local/evenements/dashboard.php', ['id' => $event->id]), format_string($event->name), ['class' => 'evt-name']),
+        html_writer::link(new moodle_url('/local/evenements/dashboard.php', ['id' => $event->id]), format_string($event->name), [
+            'class' => 'evt-name']),
         userdate($event->timestart, get_string('strftimedatefullshort', 'langconfig')),
         ($ispast($event) ? html_writer::span(get_string('status_past', 'local_evenements'), 'evt-badge evt-badge-past') :
-            html_writer::span(get_string('status_' . $event->status, 'local_evenements'),
-                'evt-badge evt-badge-' . $event->status)),
+            html_writer::span(
+                get_string('status_' . $event->status, 'local_evenements'),
+                'evt-badge evt-badge-' . $event->status
+            )),
         $booked,
         html_writer::div(implode('', $links), 'd-flex flex-wrap gap-1'),
     ];

@@ -50,24 +50,34 @@ if ($data = $mform->get_data()) {
     $content = $mform->get_file_content('csvfile');
     $report = booking_manager::import_guests($event, (string) $content, !empty($data->sendmail), (int) ($data->sessionid ?? 0));
     if ($report->created) {
-        \local_evenements\participant_manager::log((int) $event->id, 0, 0, 'add',
-            get_string('logimported', 'local_evenements', $report->created));
+        \local_evenements\participant_manager::log(
+            (int) $event->id,
+            0,
+            0,
+            'add',
+            get_string('logimported', 'local_evenements', $report->created)
+        );
     }
 }
 
 echo $OUTPUT->header();
 echo \local_evenements\output\ui::event_header($event, 'registrations');
 if ($report) {
-    echo $OUTPUT->notification(get_string('importresult', 'local_evenements', (object) ['created' => $report->created,
+    echo $OUTPUT->notification(
+        get_string('importresult', 'local_evenements', (object) ['created' => $report->created,
         'skipped' => $report->skipped, 'errors' => count($report->errors)]),
-        $report->created ? \core\output\notification::NOTIFY_SUCCESS : \core\output\notification::NOTIFY_WARNING);
+        $report->created ? \core\output\notification::NOTIFY_SUCCESS : \core\output\notification::NOTIFY_WARNING
+    );
     if ($report->errors) {
         echo html_writer::tag('ul', implode('', array_map(function ($e) {
             return html_writer::tag('li', s($e));
         }, $report->errors)), ['class' => 'text-danger']);
     }
-    echo html_writer::div(html_writer::link(new moodle_url('/local/evenements/registrations.php', ['id' => $id]),
-        get_string('registrations', 'local_evenements'), ['class' => 'btn btn-primary']), 'mb-3');
+    echo html_writer::div(html_writer::link(
+        new moodle_url('/local/evenements/registrations.php', ['id' => $id]),
+        get_string('registrations', 'local_evenements'),
+        ['class' => 'btn btn-primary']
+    ), 'mb-3');
 }
 echo html_writer::tag('p', get_string('importhelp', 'local_evenements'), ['class' => 'evt-note']);
 $mform->display();

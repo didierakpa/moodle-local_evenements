@@ -1,0 +1,126 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_evenements/operator_app
+
+    Door app (PWA): a whole page without the Moodle theme, installable on a phone.
+    The script pwa/operator.js reads its settings from the data-evtop attribute of the body.
+
+    Context variables required for this template:
+    * lang - Language code of the page
+    * base - URL of the plugin, ending with a slash
+    * config - JSON settings of the app (API address, texts)
+
+    Example context (json):
+    {
+        "lang": "en",
+        "base": "https://example.com/local/evenements/",
+        "config": "{\"api\":\"https://example.com/local/evenements/operator_api.php\",\"t\":{}}"
+    }
+}}
+<!doctype html>
+<html lang="{{lang}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1d4e89">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="{{#str}}op_shortname, local_evenements{{/str}}">
+<meta name="robots" content="noindex">
+<title>{{#str}}op_title, local_evenements{{/str}}</title>
+<link rel="manifest" href="{{base}}operator_manifest.php">
+<link rel="apple-touch-icon" href="{{base}}pwa/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="{{base}}pwa/icon-192.png">
+<link rel="stylesheet" href="{{base}}pwa/operator.css">
+</head>
+<body data-evtop="{{config}}">
+
+<section id="login" class="hidden">
+    <img src="{{base}}pwa/icon-192.png" alt="">
+    <h1>{{#str}}op_title, local_evenements{{/str}}</h1>
+    <p>{{#str}}op_loginhelp, local_evenements{{/str}}</p>
+    <form id="loginform" autocomplete="off">
+        <input type="text" id="code" placeholder="XXXX-XXXX-XXXX-XXXX" aria-label="{{#str}}op_code, local_evenements{{/str}}" autocapitalize="characters" autocorrect="off" spellcheck="false" required>
+        <button class="btn" type="submit">{{#str}}op_login, local_evenements{{/str}}</button>
+    </form>
+    <p class="error" id="loginerr" role="alert"></p>
+    <button class="btn secondary hidden" id="btninstall" type="button">{{#str}}op_install, local_evenements{{/str}}</button>
+    <p class="muted hidden" id="ioshint">{{#str}}op_ioshint, local_evenements{{/str}}</p>
+</section>
+
+<section id="app" class="hidden">
+    <header class="bar">
+        <div class="title"><strong id="evname"></strong><span id="opname"></span></div>
+        <span class="dot" id="dot"></span><span id="netlabel" class="muted" style="color:#fff"></span>
+    </header>
+    <main>
+        <div class="counter">
+            <div class="big" id="count"></div>
+            <div class="muted">{{#str}}op_entries, local_evenements{{/str}}</div>
+            <div class="progress"><i id="bar"></i></div>
+            <div class="sync" id="syncinfo"></div>
+        </div>
+        <div class="actions">
+            <button class="btn" id="btnscan" type="button">{{#str}}op_scan, local_evenements{{/str}}</button>
+            <div class="row">
+                <button class="btn secondary" id="btnsearch" type="button">{{#str}}op_search, local_evenements{{/str}}</button>
+                <button class="btn secondary" id="btnmanual" type="button">{{#str}}op_manual, local_evenements{{/str}}</button>
+            </div>
+        </div>
+        <div class="panel recent">
+            <h2>{{#str}}op_recent, local_evenements{{/str}}</h2>
+            <p class="muted" id="recentempty">{{#str}}op_norecent, local_evenements{{/str}}</p>
+            <ul id="recentlist"></ul>
+        </div>
+        <p style="text-align:center"><button class="btn small secondary" id="btnlogout" type="button">{{#str}}op_logout, local_evenements{{/str}}</button></p>
+    </main>
+</section>
+
+<div id="camera" class="hidden">
+    <video id="video" playsinline muted></video>
+    <div class="frame"></div>
+    <div class="hint">{{#str}}op_camhint, local_evenements{{/str}}</div>
+    <button class="btn close" id="camclose" type="button">{{#str}}op_stop, local_evenements{{/str}}</button>
+</div>
+
+<div id="search" class="hidden" style="position:fixed;inset:0;z-index:25;background:var(--bg);overflow:auto;padding:1rem;padding-top:calc(env(safe-area-inset-top) + 1rem)">
+    <input type="search" id="q" placeholder="{{#str}}op_searchph, local_evenements{{/str}}" aria-label="{{#str}}op_search, local_evenements{{/str}}" autocomplete="off">
+    <div class="panel results" style="margin-top:1rem"><ul id="searchlist"></ul></div>
+    <button class="btn secondary" id="searchclose" type="button">{{#str}}op_close, local_evenements{{/str}}</button>
+</div>
+
+<div id="manual" class="hidden" style="position:fixed;inset:0;z-index:25;background:var(--bg);padding:1rem;padding-top:calc(env(safe-area-inset-top) + 1rem)">
+    <form id="manualform">
+        <input type="text" id="manualcode" placeholder="{{#str}}op_manualph, local_evenements{{/str}}" aria-label="{{#str}}op_manual, local_evenements{{/str}}" autocomplete="off" autocapitalize="off" spellcheck="false">
+        <button class="btn" type="submit" style="margin-top:1rem">{{#str}}op_check, local_evenements{{/str}}</button>
+    </form>
+    <button class="btn secondary" id="manualclose" type="button" style="margin-top:.75rem">{{#str}}op_close, local_evenements{{/str}}</button>
+</div>
+
+<div id="result" class="hidden" role="alertdialog" aria-live="assertive">
+    <div class="icon" id="rticon"></div>
+    <div class="state" id="rtstate"></div>
+    <div class="who" id="rtwho"></div>
+    <div class="info" id="rtinfo"></div>
+    <button class="btn" id="rtnext" type="button">{{#str}}op_next, local_evenements{{/str}}</button>
+    <button class="btn ghost hidden" id="rtundo" type="button">{{#str}}op_undo, local_evenements{{/str}}</button>
+</div>
+
+<script src="{{base}}pwa/operator.js"></script>
+</body>
+</html>
