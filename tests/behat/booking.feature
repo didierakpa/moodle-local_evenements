@@ -23,7 +23,7 @@ Feature: Visitors book tickets without a Moodle account
       | Confirm your e-mail address | jane@example.com |
       | First name                  | Lea              |
       | Last name                   | Martin           |
-    And I click on "I have read the information above and agree that my data is used for this event" "checkbox"
+      | I have read the information above and agree that my data is used for this event | 1 |
     And I press "Confirm the booking"
     Then I should see "Lea"
     And I should see "Martin"

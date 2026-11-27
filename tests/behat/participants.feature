@@ -31,4 +31,3 @@ Feature: Organisers manage the participants of an event
     And I press "Save changes"
     Then I should see "Changes saved"
     And I should see "DURAND-PETIT Tom"
-
