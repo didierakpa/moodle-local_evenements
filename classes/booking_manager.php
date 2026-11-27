@@ -1691,6 +1691,16 @@ class booking_manager {
     }
 
     /**
+     * Whether an event is over (its end, or its start when it has no end, is in the past).
+     *
+     * @param \stdClass $event
+     * @return bool
+     */
+    public static function is_past(\stdClass $event): bool {
+        return (int) ($event->timeend ?: $event->timestart) < time();
+    }
+
+    /**
      * Random access code: 16 characters without look-alikes (no 0/O, 1/I/L).
      *
      * @return string

@@ -103,7 +103,7 @@ $filter = optional_param('filter', 'all', PARAM_ALPHA);
 $query = trim(optional_param('q', '', PARAM_TEXT));
 $now = time();
 $ispast = function ($e) use ($now) {
-    return (int) ($e->timeend ?: $e->timestart) < $now;
+    return booking_manager::is_past($e);
 };
 $counts = ['all' => count($allevents), 'open' => 0, 'draft' => 0, 'closed' => 0, 'past' => 0];
 foreach ($allevents as $e) {
@@ -317,11 +317,7 @@ foreach ($events as $event) {
         html_writer::link(new moodle_url('/local/evenements/dashboard.php', ['id' => $event->id]), format_string($event->name), [
             'class' => 'evt-name']),
         userdate($event->timestart, get_string('strftimedatefullshort', 'langconfig')),
-        ($ispast($event) ? html_writer::span(get_string('status_past', 'local_evenements'), 'evt-badge evt-badge-past') :
-            html_writer::span(
-                get_string('status_' . $event->status, 'local_evenements'),
-                'evt-badge evt-badge-' . $event->status
-            )),
+        \local_evenements\output\ui::status_badge($event),
         $booked,
         html_writer::div(implode('', $links), 'd-flex flex-wrap gap-1'),
     ];

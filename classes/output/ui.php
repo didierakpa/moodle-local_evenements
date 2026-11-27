@@ -112,6 +112,17 @@ class ui {
     }
 
     /**
+     * Status badge of an event: "Past" once it is over, otherwise its status (draft, open, closed).
+     *
+     * @param \stdClass $event
+     * @return string
+     */
+    public static function status_badge(\stdClass $event): string {
+        $status = booking_manager::is_past($event) && $event->status !== booking_manager::STATUS_DRAFT ? 'past' : $event->status;
+        return \html_writer::span(get_string('status_' . $status, 'local_evenements'), 'evt-badge evt-badge-' . $status);
+    }
+
+    /**
      * Table of the change log (participants).
      *
      * @param \stdClass[] $rows Lines from participant_manager::get_log()
@@ -298,10 +309,7 @@ class ui {
                 ($imageurl ? \html_writer::empty_tag('img', ['src' => $imageurl, 'alt' => '', 'class' => 'evt-sidecard-img'])
                     : '') .
                 \html_writer::div(
-                    \html_writer::span(
-                        get_string('status_' . $event->status, 'local_evenements'),
-                        'evt-badge evt-badge-' . $event->status
-                    ) .
+                    self::status_badge($event) .
                     ($islive ? \html_writer::span(get_string('navlive', 'local_evenements'), 'evt-live') : '') .
                     \html_writer::div(format_string($event->name), 'evt-sidecard-name') .
                     \html_writer::div(
@@ -492,10 +500,7 @@ class ui {
      * @return string
      */
     public static function event_header(\stdClass $event, string $active): string {
-        $status = \html_writer::span(
-            get_string('status_' . $event->status, 'local_evenements'),
-            'evt-badge evt-badge-' . $event->status
-        );
+        $status = self::status_badge($event);
         $public = \html_writer::link(
             new \moodle_url('/local/evenements/event.php', ['id' => $event->id]),
             get_string('viewpublicpage', 'local_evenements'),
