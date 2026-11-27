@@ -392,8 +392,7 @@ $f1 = html_writer::tag(
         'invimport',
         'local_evenements'
     ),
-        'placeholder' => "MARTIN ; Léa ; lea.martin@example.org ; Diplômé ; Bac Pro AGOrA ; 3\n" .
-            "DURAND ; Paul ; paul@example.org ; Partenaire ; Entreprise Airbus ; 1"]) .
+        'placeholder' => get_string('invimportplaceholder', 'local_evenements')]) .
     html_writer::tag('button', get_string('invimportbtn', 'local_evenements'), ['type' => 'submit', 'class' => 'btn btn-primary']),
     ['method' => 'post', 'action' => $PAGE->url->out(false), 'class' => 'evt-panel']
 );

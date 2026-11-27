@@ -122,7 +122,7 @@ $string['categories'] = 'Catégories de billets';
 $string['categories_help'] = 'Une catégorie par ligne, au format « Nom|quota ». Le quota est facultatif (0 ou absent = pas de limite propre à la catégorie). Vous pouvez ajouter un texte imprimé sur les billets de la catégorie : « Nom|quota|texte ».
 
 Exemple :
-Élève|50
+Apprenant|50
 Famille|150
 Diplômé
 Partenaire|20
@@ -155,7 +155,7 @@ $string['checkquestions'] = 'Questions aux invités (facultatif)';
 $string['checkquestionshelp'] = 'Régime alimentaire, filière visée, enquête de satisfaction…';
 $string['checkticket'] = 'Vérifier';
 $string['checktickets'] = 'Catégories et quotas de billets';
-$string['checkticketshelp'] = 'Élève, famille, diplômé… avec un nombre de places par catégorie si besoin.';
+$string['checkticketshelp'] = 'Apprenant, famille, diplômé… avec un nombre de places par catégorie si besoin.';
 $string['chooseqty'] = 'Combien de billets souhaitez-vous ?';
 $string['choosesession'] = 'Choisissez votre créneau';
 $string['close'] = 'Fermer';
@@ -187,7 +187,7 @@ $string['copyof'] = '{$a} (copie)';
 $string['count'] = 'Nombre';
 $string['createevent'] = 'Créer un événement';
 $string['csvfile'] = 'Fichier CSV';
-$string['defaultcategories'] = 'Élève
+$string['defaultcategories'] = 'Apprenant
 Famille
 Diplômé
 Partenaire';
@@ -257,7 +257,7 @@ $string['formstatus_help'] = 'Brouillon : invisible du public. Ouvert : visible 
 $string['formstep1'] = '1. L\'essentiel';
 $string['formstep1help'] = 'Le nom, la date et le lieu apparaissent sur la page publique et sur les billets.';
 $string['formstep2'] = '2. Billets et places';
-$string['formstep2help'] = 'Fixez le nombre de places, les limites et les catégories de billets (élève, famille, diplômé...). Un événement reste en brouillon, invisible du public, jusqu\'à sa publication.';
+$string['formstep2help'] = 'Fixez le nombre de places, les limites et les catégories de billets (apprenant, famille, diplômé...). Un événement reste en brouillon, invisible du public, jusqu\'à sa publication.';
 $string['formstep3'] = '3. Billet et visuel';
 $string['full'] = 'Complet';
 $string['generalsettings'] = 'Réglages généraux';
@@ -318,6 +318,8 @@ $string['invimported'] = '{$a->added} personne(s) ajoutée(s), {$a->dups} déjà
 $string['invimporterror'] = 'ligne {$a->line} ({$a->text})';
 $string['invimporterrors'] = 'Lignes ignorées :';
 $string['invimporthelp'] = 'Une personne par ligne : NOM ; Prénom ; e-mail ; Catégorie ; Détail ; Nombre d\'invités. Les trois premières colonnes sont obligatoires. Vous pouvez coller directement depuis Excel.';
+$string['invimportplaceholder'] = 'MARTIN ; Léa ; lea.martin@example.org ; Diplômé ; Formation A ; 3
+DURAND ; Paul ; paul@example.org ; Partenaire ; Entreprise Exemple ; 1';
 $string['invitealreadybooked'] = 'Une réservation a déjà été faite avec ce lien.';
 $string['invitemailbody'] = 'Bonjour {$a->name},
 
@@ -332,7 +334,7 @@ Ce lien est strictement personnel et ne permet qu\'une seule réservation : merc
 
 À bientôt !';
 $string['invitemailsubject'] = 'Votre invitation : {$a->event}';
-$string['inviteshelp'] = 'Importez la liste des personnes invitées (diplômés, partenaires, enseignants, AESH, direction…). Chacune reçoit un lien personnel par e-mail, confirme son identité, puis réserve une seule fois pour elle et ses invités. Le lien ne peut servir qu\'à une personne et ne permet pas de réserver une seconde fois.';
+$string['inviteshelp'] = 'Importez la liste des personnes invitées (diplômés, partenaires, formateurs, personnels, direction…). Chacune reçoit un lien personnel par e-mail, confirme son identité, puis réserve une seule fois pour elle et ses invités. Le lien ne peut servir qu\'à une personne et ne permet pas de réserver une seconde fois.';
 $string['invlink'] = 'Lien personnel';
 $string['invmore'] = 'Plus';
 $string['invname'] = 'Nom';
@@ -419,7 +421,7 @@ $string['mimportdone'] = '{$a->added} personne(s) ajoutée(s), {$a->skipped} dé
 $string['mimportfrom'] = 'Prendre les personnes';
 $string['mimporthelp'] = 'Chaque personne reçoit son propre billet, rattaché à son compte Moodle : elle le retrouve dans « Mes billets ». Les personnes qui ont déjà un billet sont ignorées.';
 $string['mimportintro'] = 'Ajoutez d\'un coup les membres d\'une cohorte ou les inscrits d\'un cours (par exemple une classe), sans passer par un fichier CSV.';
-$string['mimportintrolist'] = 'Ajoutez d\'un coup à la liste des invités les membres d\'une cohorte ou les inscrits d\'un cours (par exemple les élèves de terminale), sans passer par un fichier CSV.';
+$string['mimportintrolist'] = 'Ajoutez d\'un coup à la liste des invités les membres d\'une cohorte ou les inscrits d\'un cours (par exemple une promotion de diplômés), sans passer par un fichier CSV.';
 $string['mimportlisthelp'] = 'Les personnes sont ajoutées à la liste des invités. Envoyez ensuite leurs liens personnels depuis la page « Liste des invités ». Les personnes déjà présentes dans la liste sont ignorées.';
 $string['mimportmenu'] = 'Ajouter depuis Moodle';
 $string['mimportmore'] = '… et {$a} autre(s).';
@@ -687,17 +689,18 @@ $string['qm_ceremony_q2'] = 'Un mot pour les diplômés (facultatif)';
 $string['qm_discovery'] = 'Comment nous avez-vous connus ?';
 $string['qm_discovery_desc'] = 'Origine de l\'inscription et projet d\'orientation (portes ouvertes).';
 $string['qm_discovery_q1'] = 'Comment avez-vous connu cet événement ?';
-$string['qm_discovery_q1opts'] = 'Site du lycée
+$string['qm_discovery_q1opts'] = 'Site de l\'établissement
 Réseaux sociaux
-Collège / professeur
+Établissement d\'origine / enseignant
 Bouche à oreille
 Salon ou forum
 Autre';
-$string['qm_discovery_q2'] = 'Niveau actuel de l\'élève';
-$string['qm_discovery_q2opts'] = '3e
-2nde
-1re
-Terminale
+$string['qm_discovery_q2'] = 'Niveau actuel de l\'apprenant';
+$string['qm_discovery_q2opts'] = 'Collège
+Lycée
+Bac+1 / Bac+2
+Bac+3 et plus
+Vie active
 Autre';
 $string['qm_discovery_q3'] = 'Formation(s) qui vous intéresse(nt) (facultatif)';
 $string['qm_guestinfo'] = 'Informations par invité';
@@ -718,7 +721,7 @@ Non';
 $string['qm_nextyear_q2'] = 'Vos idées pour la prochaine édition (facultatif)';
 $string['qm_orientation'] = 'Après les portes ouvertes';
 $string['qm_orientation_desc'] = 'Suites données : recontact et formation visée.';
-$string['qm_orientation_q1'] = 'Souhaitez-vous être recontacté(e) par le lycée ?';
+$string['qm_orientation_q1'] = 'Souhaitez-vous être recontacté(e) par l\'établissement ?';
 $string['qm_orientation_q1opts'] = 'Oui
 Non';
 $string['qm_orientation_q2'] = 'Formation visée (facultatif)';
@@ -780,7 +783,7 @@ $string['questionshelp'] = 'Les questions « à la réservation » apparaissent 
 $string['questiontext'] = 'Question';
 $string['quotareached'] = 'Il n\'y a plus assez de places dans la catégorie « {$a} ».';
 $string['ratelimit'] = 'Limite anti-spam (réservations par heure et par adresse IP)';
-$string['ratelimit_desc'] = 'Nombre maximum de réservations par heure depuis une même adresse IP. Mettre 0 pour désactiver. Attention : les personnes connectées au Wi-Fi du lycée partagent souvent la même adresse IP.';
+$string['ratelimit_desc'] = 'Nombre maximum de réservations par heure depuis une même adresse IP. Mettre 0 pour désactiver. Attention : les personnes connectées au Wi-Fi de l\'établissement partagent souvent la même adresse IP.';
 $string['ratelimited'] = 'Trop de réservations ont été faites depuis votre connexion. Merci de réessayer plus tard.';
 $string['readytopublish'] = 'Préparez votre événement';
 $string['readytopublishhelp'] = 'Complétez ces étapes, puis publiez : l\'événement apparaîtra sur la page publique et pourra recevoir des réservations.';
@@ -919,7 +922,7 @@ $string['ticketfont'] = 'Police du billet';
 $string['ticketformat'] = 'Format du billet';
 $string['ticketformat_help'] = 'Compact : petit billet type billet de train (148 × 68 mm, 4 par feuille A4). Carte d\'embarquement : type billet d\'avion avec talon (175 × 74 mm, 3 par feuille). Concert : grand billet (210 × 90 mm).';
 $string['ticketlogo'] = 'Logo sur le billet';
-$string['ticketlogo_help'] = 'Petit logo (par exemple celui du lycée) affiché en haut à droite du billet PDF. Fond transparent conseillé.';
+$string['ticketlogo_help'] = 'Petit logo (par exemple celui de l\'établissement) affiché en haut à droite du billet PDF. Fond transparent conseillé.';
 $string['ticketnotfound'] = 'Billet introuvable';
 $string['ticketnumber'] = 'N° de billet';
 $string['ticketpreview'] = 'Aperçu du billet';
@@ -938,12 +941,12 @@ $string['ticketword'] = 'billet(s)';
 $string['timeused'] = 'Entrée';
 $string['tokenlabel'] = 'Code du billet (ou adresse complète du QR code)';
 $string['toomany'] = 'Vous pouvez réserver au maximum {$a} billet(s) à la fois.';
-$string['tpl_forum_categories'] = 'Élève|50
+$string['tpl_forum_categories'] = 'Apprenant|50
 Partenaire|20
 Famille|10';
 $string['tpl_forum_desc'] = '<p>Rencontrez des professionnels, échangez sur leurs métiers et préparez votre orientation ou votre recherche de stage.</p>';
 $string['tpl_forum_name'] = 'Forum des métiers';
-$string['tpl_forum_place'] = 'Lycée, Toulouse';
+$string['tpl_forum_place'] = 'Votre établissement, Ville';
 $string['tpl_forum_q1'] = 'Organisme ou entreprise (si partenaire)';
 $string['tpl_forum_q2'] = 'Avis et suggestions pour le prochain forum';
 $string['tpl_forum_short'] = 'Rencontres avec des professionnels et des partenaires.';
@@ -953,7 +956,7 @@ $string['tpl_graduation_categories'] = 'Diplômé|0|Pièce d\'identité obligato
 Invité|0';
 $string['tpl_graduation_desc'] = '<p>Nous avons le plaisir de vous convier à la cérémonie de remise des diplômes.</p><p>Chaque diplômé dispose d\'un nombre limité d\'invitations nominatives. Merci de vous munir de votre billet.</p>';
 $string['tpl_graduation_name'] = 'Remise des diplômes';
-$string['tpl_graduation_place'] = 'Salle de cérémonie, Toulouse';
+$string['tpl_graduation_place'] = 'Salle de cérémonie, Ville';
 $string['tpl_graduation_q1'] = 'Souhaitez-vous participer au buffet ?';
 $string['tpl_graduation_q1opts'] = 'Oui
 Non';
@@ -964,18 +967,18 @@ $string['tpl_graduation_q3'] = 'Un mot sur la cérémonie ?';
 $string['tpl_graduation_short'] = 'Cérémonie nominative pour les diplômés et leurs invités.';
 $string['tpl_graduation_ticket'] = 'Remise des diplômes';
 $string['tpl_graduation_tickettext'] = 'Billet nominatif, non cessible.';
-$string['tpl_jpo_categories'] = 'Futur élève|100
+$string['tpl_jpo_categories'] = 'Futur apprenant|100
 Famille|100';
-$string['tpl_jpo_desc'] = '<p>Venez découvrir notre établissement, ses formations et ses équipes pédagogiques.</p><ul><li>Visite des ateliers et des salles</li><li>Rencontre avec les enseignants et les élèves</li><li>Informations sur les formations et l\'orientation</li></ul><p>Entrée libre, réservation nécessaire pour faciliter l\'accueil.</p>';
+$string['tpl_jpo_desc'] = '<p>Venez découvrir notre établissement, ses formations et ses équipes pédagogiques.</p><ul><li>Visite des locaux et des salles</li><li>Rencontre avec les formateurs et les apprenants</li><li>Informations sur les formations et l\'orientation</li></ul><p>Entrée libre, réservation nécessaire pour faciliter l\'accueil.</p>';
 $string['tpl_jpo_name'] = 'Journée portes ouvertes';
-$string['tpl_jpo_place'] = 'Lycée des Métiers Sainte Marie de Saint Sernin, Toulouse';
+$string['tpl_jpo_place'] = 'Votre établissement, Ville';
 $string['tpl_jpo_q1'] = 'Quelle formation vous intéresse ?';
-$string['tpl_jpo_q1opts'] = 'Bac Pro AGOrA
-Bac Pro Métiers de l\'accueil
-Bac Pro GATL
+$string['tpl_jpo_q1opts'] = 'Formation A
+Formation B
+Formation C
 Je ne sais pas encore';
 $string['tpl_jpo_q2'] = 'Comment avez-vous connu la journée portes ouvertes ? Un avis, une suggestion ?';
-$string['tpl_jpo_short'] = 'Accueil des futurs élèves et de leurs familles, visites et ateliers.';
+$string['tpl_jpo_short'] = 'Accueil des futurs apprenants et de leurs familles, visites et ateliers.';
 $string['tpl_jpo_ticket'] = 'Journée portes ouvertes';
 $string['tpl_jpo_tickettext'] = 'Présentez ce billet (sur téléphone ou imprimé) à l\'accueil. Accès libre et gratuit.';
 $string['tplprefix'] = 'Modèle – ';

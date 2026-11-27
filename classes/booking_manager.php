@@ -1920,7 +1920,7 @@ class booking_manager {
      * @param string $first
      * @param string $last
      * @param string $email
-     * @param string $category Ticket category name (Diplômé, Partenaire...)
+     * @param string $category Ticket category name (Graduate, Partner...)
      * @param string $detail Diploma, company...
      * @param int|null $quota Number of guests (null = default of the event)
      * @return \stdClass|null The invitee, or null when it is already in the list

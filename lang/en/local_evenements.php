@@ -122,7 +122,7 @@ $string['categories'] = 'Ticket categories';
 $string['categories_help'] = 'One category per line, in the format "Name|quota". The quota is optional (0 or missing = no limit specific to the category). You can add a text printed on the tickets of the category: "Name|quota|text".
 
 Example:
-Student|50
+Learner|50
 Family|150
 Graduate
 Partner|20
@@ -155,7 +155,7 @@ $string['checkquestions'] = 'Questions for guests (optional)';
 $string['checkquestionshelp'] = 'Diet, field of interest, satisfaction survey…';
 $string['checkticket'] = 'Check';
 $string['checktickets'] = 'Ticket categories and quotas';
-$string['checkticketshelp'] = 'Student, family, graduate… with a number of places per category if needed.';
+$string['checkticketshelp'] = 'Learner, family, graduate… with a number of places per category if needed.';
 $string['chooseqty'] = 'How many tickets do you need?';
 $string['choosesession'] = 'Choose your time slot';
 $string['close'] = 'Close';
@@ -187,7 +187,7 @@ $string['copyof'] = '{$a} (copy)';
 $string['count'] = 'Number';
 $string['createevent'] = 'Create an event';
 $string['csvfile'] = 'CSV file';
-$string['defaultcategories'] = 'Student
+$string['defaultcategories'] = 'Learner
 Family
 Graduate
 Partner';
@@ -257,7 +257,7 @@ $string['formstatus_help'] = 'Draft: hidden. Open: visible and bookable. Closed:
 $string['formstep1'] = '1. The essentials';
 $string['formstep1help'] = 'Name, date and place appear on the public page and on the tickets.';
 $string['formstep2'] = '2. Tickets and places';
-$string['formstep2help'] = 'Set the number of places, the limits and the ticket categories (student, family, graduate...). An event stays a draft, hidden from the public, until it is published.';
+$string['formstep2help'] = 'Set the number of places, the limits and the ticket categories (learner, family, graduate...). An event stays a draft, hidden from the public, until it is published.';
 $string['formstep3'] = '3. Ticket and visual';
 $string['full'] = 'Full';
 $string['generalsettings'] = 'General settings';
@@ -318,6 +318,8 @@ $string['invimported'] = '{$a->added} person(s) added, {$a->dups} already presen
 $string['invimporterror'] = 'line {$a->line} ({$a->text})';
 $string['invimporterrors'] = 'Ignored lines:';
 $string['invimporthelp'] = 'One person per line: LAST NAME ; First name ; e-mail ; Category ; Detail ; Number of guests. The first three columns are required. You can paste straight from Excel.';
+$string['invimportplaceholder'] = 'MARTIN ; Lea ; lea.martin@example.org ; Graduate ; Course A ; 3
+DURAND ; Paul ; paul@example.org ; Partner ; Example Company ; 1';
 $string['invitealreadybooked'] = 'A booking has already been made with this link.';
 $string['invitemailbody'] = 'Hello {$a->name},
 
@@ -332,7 +334,7 @@ This link is strictly personal and allows one booking only: please do not share 
 
 See you soon!';
 $string['invitemailsubject'] = 'Your invitation: {$a->event}';
-$string['inviteshelp'] = 'Import the list of invited people (graduates, partners, teachers, support staff, management…). Each person receives a personal link by e-mail, confirms their identity, then books once for themselves and their guests. A link serves one person and cannot be used to book a second time.';
+$string['inviteshelp'] = 'Import the list of invited people (graduates, partners, trainers, staff, management…). Each person receives a personal link by e-mail, confirms their identity, then books once for themselves and their guests. A link serves one person and cannot be used to book a second time.';
 $string['invlink'] = 'Personal link';
 $string['invmore'] = 'More';
 $string['invname'] = 'Name';
@@ -419,7 +421,7 @@ $string['mimportdone'] = '{$a->added} person(s) added, {$a->skipped} already the
 $string['mimportfrom'] = 'Take the people';
 $string['mimporthelp'] = 'Each person gets their own ticket, linked to their Moodle account: they find it in "My tickets". People who already have a ticket are skipped.';
 $string['mimportintro'] = 'Add at once the members of a cohort or the people enrolled in a course (a class, for example), without a CSV file.';
-$string['mimportintrolist'] = 'Add at once to the invitation list the members of a cohort or the people enrolled in a course (the final-year students, for example), without a CSV file.';
+$string['mimportintrolist'] = 'Add at once to the invitation list the members of a cohort or the people enrolled in a course (a graduating class, for example), without a CSV file.';
 $string['mimportlisthelp'] = 'The people are added to the invitation list. Then send their personal links from the "Invitation list" page. People already in the list are skipped.';
 $string['mimportmenu'] = 'Add from Moodle';
 $string['mimportmore'] = '... and {$a} more.';
@@ -658,7 +660,7 @@ $string['privacy:metadata:waitlist:quantity'] = 'Number of tickets wanted.';
 $string['privacy:metadata:waitlist:timecreated'] = 'Date of registration on the list.';
 $string['privacy:metadata:waitlist:userid'] = 'Moodle account, if any.';
 $string['privacynotice'] = 'GDPR information text';
-$string['privacynotice_default'] = 'The data entered (names, e-mail address) is used only to organise this event: ticket issue, entrance check and information for participants. It is deleted automatically after the event. You can ask the school for access, correction or deletion of your data.';
+$string['privacynotice_default'] = 'The data entered (names, e-mail address) is used only to organise this event: ticket issue, entrance check and information for participants. It is deleted automatically after the event. You can ask the organiser for access, correction or deletion of your data.';
 $string['privacynotice_desc'] = 'Text shown above the consent box of the booking form. Have it validated by the data protection officer.';
 $string['publicpage'] = 'Public page';
 $string['publishevent'] = 'Publish the event';
@@ -687,17 +689,18 @@ $string['qm_ceremony_q2'] = 'A word for the graduates (optional)';
 $string['qm_discovery'] = 'How did you hear about us?';
 $string['qm_discovery_desc'] = 'Source of the registration and study plans (open days).';
 $string['qm_discovery_q1'] = 'How did you hear about this event?';
-$string['qm_discovery_q1opts'] = 'School website
+$string['qm_discovery_q1opts'] = 'Institution website
 Social media
-Middle school / teacher
+Previous institution / teacher
 Word of mouth
 Fair or forum
 Other';
-$string['qm_discovery_q2'] = 'Current level of the student';
-$string['qm_discovery_q2opts'] = 'Year 9
-Year 10
-Year 11
-Year 12
+$string['qm_discovery_q2'] = 'Current level of the learner';
+$string['qm_discovery_q2opts'] = 'Lower secondary
+Upper secondary
+First years of higher education
+Bachelor\'s degree or above
+Working
 Other';
 $string['qm_discovery_q3'] = 'Course(s) you are interested in (optional)';
 $string['qm_guestinfo'] = 'Information per guest';
@@ -718,7 +721,7 @@ No';
 $string['qm_nextyear_q2'] = 'Your ideas for the next edition (optional)';
 $string['qm_orientation'] = 'After the open day';
 $string['qm_orientation_desc'] = 'Follow-up: contact request and target course.';
-$string['qm_orientation_q1'] = 'Would you like the school to contact you?';
+$string['qm_orientation_q1'] = 'Would you like the institution to contact you?';
 $string['qm_orientation_q1opts'] = 'Yes
 No';
 $string['qm_orientation_q2'] = 'Target course (optional)';
@@ -780,7 +783,7 @@ $string['questionshelp'] = '"At booking time" questions appear in the booking fo
 $string['questiontext'] = 'Question';
 $string['quotareached'] = 'There are not enough places left in the category "{$a}".';
 $string['ratelimit'] = 'Anti-spam limit (bookings per hour and per IP address)';
-$string['ratelimit_desc'] = 'Maximum number of bookings per hour from the same IP address. Use 0 to disable. Note that people on the school Wi-Fi often share the same IP address.';
+$string['ratelimit_desc'] = 'Maximum number of bookings per hour from the same IP address. Use 0 to disable. Note that people on the institution\'s Wi-Fi often share the same IP address.';
 $string['ratelimited'] = 'Too many bookings were made from your connection. Please try again later.';
 $string['readytopublish'] = 'Get your event ready';
 $string['readytopublishhelp'] = 'Complete these steps, then publish: the event will appear on the public page and can receive bookings.';
@@ -919,7 +922,7 @@ $string['ticketfont'] = 'Ticket font';
 $string['ticketformat'] = 'Ticket format';
 $string['ticketformat_help'] = 'Compact: small train-ticket style (148 × 68 mm, 4 per A4 sheet). Boarding pass: plane-ticket style with a stub (175 × 74 mm, 3 per sheet). Concert: large ticket (210 × 90 mm).';
 $string['ticketlogo'] = 'Logo on the ticket';
-$string['ticketlogo_help'] = 'Small logo (for example your school) shown at the top right of the PDF ticket. A transparent background is recommended.';
+$string['ticketlogo_help'] = 'Small logo (for example your institution\'s) shown at the top right of the PDF ticket. A transparent background is recommended.';
 $string['ticketnotfound'] = 'Ticket not found';
 $string['ticketnumber'] = 'Ticket no.';
 $string['ticketpreview'] = 'Ticket preview';
@@ -938,12 +941,12 @@ $string['ticketword'] = 'ticket(s)';
 $string['timeused'] = 'Entry';
 $string['tokenlabel'] = 'Ticket code (or full address of the QR code)';
 $string['toomany'] = 'You can book at most {$a} ticket(s) at a time.';
-$string['tpl_forum_categories'] = 'Student|50
+$string['tpl_forum_categories'] = 'Learner|50
 Partner|20
 Family|10';
 $string['tpl_forum_desc'] = '<p>Meet professionals, talk about their jobs and prepare your guidance or your search for a placement.</p>';
 $string['tpl_forum_name'] = 'Careers forum';
-$string['tpl_forum_place'] = 'Your school, Toulouse';
+$string['tpl_forum_place'] = 'Your institution, City';
 $string['tpl_forum_q1'] = 'Organisation or company (if partner)';
 $string['tpl_forum_q2'] = 'Feedback for the next forum';
 $string['tpl_forum_short'] = 'Meetings with professionals and partners.';
@@ -953,7 +956,7 @@ $string['tpl_graduation_categories'] = 'Graduate|0|Photo ID required to collect 
 Guest|0';
 $string['tpl_graduation_desc'] = '<p>We are delighted to invite you to the graduation ceremony.</p><p>Each graduate has a limited number of named invitations. Please bring your ticket.</p>';
 $string['tpl_graduation_name'] = 'Graduation ceremony';
-$string['tpl_graduation_place'] = 'Ceremony hall, Toulouse';
+$string['tpl_graduation_place'] = 'Ceremony hall, City';
 $string['tpl_graduation_q1'] = 'Would you like to join the buffet?';
 $string['tpl_graduation_q1opts'] = 'Yes
 No';
@@ -964,17 +967,17 @@ $string['tpl_graduation_q3'] = 'A word about the ceremony?';
 $string['tpl_graduation_short'] = 'Named ceremony for graduates and their guests.';
 $string['tpl_graduation_ticket'] = 'Graduation ceremony';
 $string['tpl_graduation_tickettext'] = 'Named ticket, not transferable.';
-$string['tpl_jpo_categories'] = 'Future student|100
+$string['tpl_jpo_categories'] = 'Future learner|100
 Family|100';
-$string['tpl_jpo_desc'] = '<p>Come and discover our school, its courses and its teaching teams.</p><ul><li>Tour of the workshops and classrooms</li><li>Meet teachers and students</li><li>Information about courses and guidance</li></ul><p>Free entry, booking required to help us welcome you.</p>';
+$string['tpl_jpo_desc'] = '<p>Come and discover our institution, its courses and its teaching teams.</p><ul><li>Tour of the premises and classrooms</li><li>Meet trainers and learners</li><li>Information about courses and guidance</li></ul><p>Free entry, booking required to help us welcome you.</p>';
 $string['tpl_jpo_name'] = 'Open day';
-$string['tpl_jpo_place'] = 'Your school, Toulouse';
+$string['tpl_jpo_place'] = 'Your institution, City';
 $string['tpl_jpo_q1'] = 'Which course interests you?';
 $string['tpl_jpo_q1opts'] = 'Course A
 Course B
 I do not know yet';
 $string['tpl_jpo_q2'] = 'How did you hear about the open day? Any feedback?';
-$string['tpl_jpo_short'] = 'Welcome future students and their families: visits and workshops.';
+$string['tpl_jpo_short'] = 'Welcome future learners and their families: visits and workshops.';
 $string['tpl_jpo_ticket'] = 'Open day';
 $string['tpl_jpo_tickettext'] = 'Show this ticket (on your phone or printed) at the reception. Free entry.';
 $string['tplprefix'] = 'Model – ';
