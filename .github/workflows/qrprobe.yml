@@ -1,0 +1,39 @@
+name: QR probe (temporary)
+on:
+  push:
+    paths:
+      - '.github/workflows/qrprobe.yml'
+jobs:
+  probe:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        php: ['8.3', '8.4']
+    steps:
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+      - name: Probe
+        run: |
+          git clone -q --depth 1 --filter=blob:none --sparse -b MOODLE_503_STABLE https://github.com/moodle/moodle.git m
+          cd m && git sparse-checkout set public/lib/tcpdf && cd public/lib/tcpdf
+          cat > probe.php <<'PHP'
+          <?php
+          require 'tcpdf_barcodes_2d.php';
+          set_error_handler(function ($no, $str, $file, $line) { throw new ErrorException($str, 0, $no, $file, $line); });
+          foreach (['L', 'M', 'Q', 'H'] as $lvl) {
+              $fails = [];
+              for ($len = 20; $len <= 160; $len++) {
+                  $url = substr('http://localhost/local/evenements/scan.php?t=' . sha1((string) $len) . sha1('y' . $len) . sha1('z'), 0, $len);
+                  try { (new TCPDF2DBarcode($url, 'QRCODE,' . $lvl))->getBarcodeArray(); } catch (Throwable $e) { $fails[] = $len . ':' . $e->getLine(); }
+              }
+              echo PHP_VERSION, " $lvl fails: ", $fails ? implode(' ', $fails) : 'none', "\n";
+          }
+          $tok = sha1('x');
+          foreach (['http://localhost/moodle', 'http://127.0.0.1:8000', 'http://localhost'] as $root) {
+              $url = $root . '/local/evenements/scan.php?t=' . $tok;
+              try { (new TCPDF2DBarcode($url, 'QRCODE,M'))->getBarcodeArray(); echo "ok $url\n"; } catch (Throwable $e) { echo "FAIL $url: ", $e->getMessage(), ' @', $e->getLine(), "\n"; }
+          }
+          PHP
+          php probe.php
