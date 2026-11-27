@@ -773,6 +773,7 @@ $string['qmodelnone'] = 'Ces questions sont déjà présentes dans l\'événemen
 $string['qmodelpreview'] = 'Voir les questions';
 $string['qmodels'] = 'Modèles de questionnaires';
 $string['qmodelshelp'] = 'Ajoutez en un clic des questions prêtes à l\'emploi, à poser avant (à la réservation) ou après l\'événement. Vous pourrez ensuite les modifier, les déplacer ou les supprimer.';
+$string['qrcodefailed'] = 'Le QR code du billet n’a pas pu être généré.';
 $string['questiondeleted'] = 'La question a été supprimée.';
 $string['questionnaires'] = 'Questionnaires';
 $string['questionnairesof'] = 'Questionnaires : {$a}';

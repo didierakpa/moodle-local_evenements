@@ -773,6 +773,7 @@ $string['qmodelnone'] = 'These questions are already in the event.';
 $string['qmodelpreview'] = 'See the questions';
 $string['qmodels'] = 'Questionnaire models';
 $string['qmodelshelp'] = 'Add ready-made questions in one click, to ask before (at booking) or after the event. You can then edit, move or delete them.';
+$string['qrcodefailed'] = 'The QR code of the ticket could not be generated.';
 $string['questiondeleted'] = 'The question has been deleted.';
 $string['questionnaires'] = 'Questionnaires';
 $string['questionnairesof'] = 'Questionnaires: {$a}';

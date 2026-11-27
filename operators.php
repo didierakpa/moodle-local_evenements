@@ -24,7 +24,6 @@
  */
 
 require_once(__DIR__ . '/../../config.php');
-require_once($CFG->libdir . '/tcpdf/tcpdf_barcodes_2d.php');
 
 use local_evenements\booking_manager;
 
@@ -55,8 +54,7 @@ $invite = function (\stdClass $op) use ($appurl) {
     return new moodle_url($appurl, ['k' => $op->code]);
 };
 $qr = function (string $url, int $size = 5) {
-    $barcode = new TCPDF2DBarcode($url, 'QRCODE,M');
-    return $barcode->getBarcodeSVGcode($size, $size, 'black');
+    return \local_evenements\local\qr_encoder::svg($url, $size);
 };
 
 if ($action === 'add' && confirm_sesskey()) {

@@ -4,7 +4,7 @@ A Moodle *local* plugin to run events — open days, graduation ceremonies, care
 booking to the check-in at the door. Visitors book without a Moodle account and receive named tickets
 with a QR code by e-mail.
 
-- Version 1.1.0 (stable) — Moodle 5.0 or later
+- Version 1.1.1 (stable) — Moodle 5.0 to 5.3
 - Licence: GNU GPL v3 or later
 - French: [README.fr.md](README.fr.md)
 

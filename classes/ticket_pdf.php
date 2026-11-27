@@ -365,9 +365,7 @@ class ticket_pdf {
      * @param float $size
      */
     private static function draw_qr(\pdf $pdf, \stdClass $ticket, float $x, float $y, float $size): void {
-        $style = ['border' => 0, 'vpadding' => 'auto', 'hpadding' => 'auto', 'fgcolor' => [0, 0, 0], 'bgcolor' => false,
-            'module_width' => 1, 'module_height' => 1];
-        $pdf->write2DBarcode(booking_manager::ticket_scan_url($ticket)->out(false), 'QRCODE,M', $x, $y, $size, $size, $style, 'N');
+        local\qr_encoder::draw($pdf, booking_manager::ticket_scan_url($ticket)->out(false), $x, $y, $size);
     }
 
     /**
@@ -478,17 +476,8 @@ class ticket_pdf {
         $pdf->SetLineStyle(['dash' => 0]);
 
         // QR code and serial number.
-        $style = [
-            'border' => 0,
-            'vpadding' => 'auto',
-            'hpadding' => 'auto',
-            'fgcolor' => [0, 0, 0],
-            'bgcolor' => false,
-            'module_width' => 1,
-            'module_height' => 1,
-        ];
         $url = booking_manager::ticket_scan_url($ticket)->out(false);
-        $pdf->write2DBarcode($url, 'QRCODE,M', $perforation + 7, 17, 41, 41, $style, 'N');
+        local\qr_encoder::draw($pdf, $url, $perforation + 7, 17, 41);
 
         $pdf->SetFont($font, 'B', 9);
         $pdf->SetTextColor(40, 40, 40);

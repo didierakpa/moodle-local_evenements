@@ -266,17 +266,12 @@ class badge_pdf {
         // QR of the ticket (guests only).
         if ($big && !empty($person['ticket'])) {
             $qr = 30;
-            $style = ['border' => 0, 'vpadding' => 'auto', 'hpadding' => 'auto', 'fgcolor' => [0, 0, 0], 'bgcolor' => false,
-                'module_width' => 1, 'module_height' => 1];
-            $pdf->write2DBarcode(
+            local\qr_encoder::draw(
+                $pdf,
                 booking_manager::ticket_scan_url($person['ticket'])->out(false),
-                'QRCODE,M',
                 ($w - $qr) / 2,
                 $h - $botband - $qr - 3,
-                $qr,
-                $qr,
-                $style,
-                'N'
+                $qr
             );
         }
 

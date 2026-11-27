@@ -24,7 +24,7 @@ namespace local_evenements;
  * @copyright  2026 Didier AKPA
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @covers     \local_evenements\ticket_pdf
- * @covers     \local_evenements\badge_pdf
+ * @covers     \local_evenements\local\qr_encoder
  */
 final class ticket_pdf_test extends \advanced_testcase {
     /**
@@ -54,5 +54,20 @@ final class ticket_pdf_test extends \advanced_testcase {
         $this->assertSame([], $warnings, implode("\n", $warnings));
         $this->assertStringStartsWith('%PDF', $ticket);
         $this->assertStringStartsWith('%PDF', $sheet);
+    }
+
+    /**
+     * The QR code matrix has the size of a version 4 to 6 code and the SVG draws it.
+     */
+    public function test_qr_encoder(): void {
+        $url = 'https://www.example.com/moodle/local/evenements/scan.php?t=' . str_repeat('a1', 20);
+        $rows = local\qr_encoder::matrix($url);
+        $this->assertContains(count($rows), [33, 37, 41]);
+        $this->assertCount(count($rows), $rows[0]);
+        // Finder pattern of the top left corner.
+        $this->assertSame([1, 1, 1, 1, 1, 1, 1, 0], array_slice($rows[0], 0, 8));
+        $svg = local\qr_encoder::svg($url, 4);
+        $this->assertStringStartsWith('<svg', $svg);
+        $this->assertStringContainsString('width="' . (count($rows) * 4) . '"', $svg);
     }
 }

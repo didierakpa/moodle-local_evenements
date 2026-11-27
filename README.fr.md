@@ -4,7 +4,7 @@ Plugin Moodle de type *local* pour organiser des événements (portes ouvertes, 
 forum des métiers), de la réservation en ligne au contrôle à l'entrée. Les visiteurs réservent sans
 compte Moodle et reçoivent par e-mail des billets nominatifs avec QR code.
 
-- Version 1.1.0 (stable) — Moodle 5.0 ou ultérieur
+- Version 1.1.1 (stable) — Moodle 5.0 à 5.3
 - Licence : GNU GPL v3 ou ultérieure
 - English: [README.md](README.md)
 
