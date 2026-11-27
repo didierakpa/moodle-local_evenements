@@ -52,6 +52,10 @@ if ($action === 'delete' && $sid && confirm_sesskey()) {
     redirect($PAGE->url, get_string('sessiondeleted', 'local_evenements'), null, \core\output\notification::NOTIFY_SUCCESS);
 }
 
+// A time slot of another event cannot be changed from here.
+if ($sid && !$DB->record_exists('local_evenements_session', ['id' => $sid, 'eventid' => $id])) {
+    throw new moodle_exception('invalidsession', 'local_evenements');
+}
 $mform = new session_form(new moodle_url('/local/evenements/sessions.php', ['id' => $id, 's' => $sid]), ['event' => $event]);
 if ($mform->is_cancelled()) {
     redirect($PAGE->url);

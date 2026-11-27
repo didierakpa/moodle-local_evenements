@@ -289,6 +289,7 @@ $string['invaddone'] = 'Ajouter une personne';
 $string['invalidcategory'] = 'La catégorie de billet choisie n\'est pas valide.';
 $string['invalidcolor'] = 'Indiquez une couleur au format #RRGGBB, par exemple #1d4e89.';
 $string['invalidlink'] = 'Ce lien n\'est pas valide.';
+$string['invalidquestion'] = 'Cette question n\'existe pas.';
 $string['invalidsession'] = 'Ce créneau n\'existe pas.';
 $string['invall'] = 'Tous les statuts';
 $string['invcategory'] = 'Catégorie';

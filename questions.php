@@ -37,6 +37,11 @@ booking_manager::require_event_access($eventid);
 
 $event = booking_manager::get_event($eventid);
 
+// A question of another event cannot be changed from here.
+if ($qid && !$DB->record_exists('local_evenements_question', ['id' => $qid, 'eventid' => $eventid])) {
+    throw new moodle_exception('invalidquestion', 'local_evenements');
+}
+
 $PAGE->set_context($context);
 $PAGE->set_url(new moodle_url('/local/evenements/questions.php', ['id' => $eventid]));
 \local_evenements\output\ui::console_layout();

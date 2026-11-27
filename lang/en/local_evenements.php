@@ -289,6 +289,7 @@ $string['invaddone'] = 'Add a person';
 $string['invalidcategory'] = 'The chosen ticket category is not valid.';
 $string['invalidcolor'] = 'Enter a colour in the format #RRGGBB, for example #1d4e89.';
 $string['invalidlink'] = 'This link is not valid.';
+$string['invalidquestion'] = 'This question does not exist.';
 $string['invalidsession'] = 'This time slot does not exist.';
 $string['invall'] = 'All statuses';
 $string['invcategory'] = 'Category';

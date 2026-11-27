@@ -106,6 +106,9 @@ foreach ($rows as $row) {
         }
     }
     $line[] = '';
-    $csv->add_data($line);
+    // Values that a spreadsheet would read as a formula are kept as plain text.
+    $csv->add_data(array_map(function ($value) {
+        return preg_match('/^[=+\-@\t\r]/', (string) $value) ? "'" . $value : $value;
+    }, $line));
 }
 $csv->download_file();

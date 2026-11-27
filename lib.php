@@ -54,7 +54,7 @@ function local_evenements_pluginfile(
     if (!$event) {
         return false;
     }
-    if ($event->status === 'draft' && !has_capability('local/evenements:manage', $context)) {
+    if ($event->status === 'draft' && !\local_evenements\booking_manager::can_manage((int) $event->id)) {
         return false;
     }
 
