@@ -6,34 +6,64 @@ on:
 jobs:
   probe:
     runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        php: ['8.3', '8.4']
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: 'postgres'
+          POSTGRES_HOST_AUTH_METHOD: 'trust'
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 3
     steps:
+      - uses: actions/checkout@v4
+        with:
+          path: plugin
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: ${{ matrix.php }}
+          php-version: '8.4'
+          extensions: pgsql, zip, gd, xmlrpc, soap
+          ini-values: max_input_vars=5000
           coverage: none
-      - name: Probe
+      - name: Initialise moodle-plugin-ci
         run: |
-          git clone -q --depth 1 --filter=blob:none --sparse -b MOODLE_503_STABLE https://github.com/moodle/moodle.git m
-          cd m && git sparse-checkout set public/lib/tcpdf && cd public/lib/tcpdf
-          cat > probe.php <<'PHP'
+          composer create-project -n --no-dev --prefer-dist moodlehq/moodle-plugin-ci ci ^4
+          echo $(cd ci/bin; pwd) >> $GITHUB_PATH
+          echo $(cd ci/vendor/bin; pwd) >> $GITHUB_PATH
+          sudo locale-gen en_AU.UTF-8
+      - name: Install
+        run: moodle-plugin-ci install --plugin ./plugin --db-host=127.0.0.1 --no-init
+        env:
+          DB: pgsql
+          MOODLE_BRANCH: MOODLE_503_STABLE
+      - name: Install Moodle site and probe
+        run: |
+          cd moodle
+          php admin/cli/install_database.php --agree-license --adminpass=Admin123! --adminemail=a@example.com --fullname=T --shortname=T > /dev/null || php public/admin/cli/install_database.php --agree-license --adminpass=Admin123! --adminemail=a@example.com --fullname=T --shortname=T > /dev/null
+          cat > /tmp/probe.php <<'PHP'
           <?php
-          require 'tcpdf_barcodes_2d.php';
+          define('CLI_SCRIPT', true);
+          require(getenv('CFGPATH'));
+          \core\session\manager::set_user(get_admin());
+          $gen = new \testing_data_generator();
+          $plugin = $gen->get_plugin_generator('local_evenements');
+          $event = $plugin->create_event(['name' => 'Probe']);
+          $booking = $plugin->create_participant(['eventid' => $event->id, 'firstname' => 'Lea', 'lastname' => 'Martin']);
+          $tickets = \local_evenements\booking_manager::get_tickets((int) $booking->id);
+          foreach ($tickets as $t) { echo "scan url: ", \local_evenements\booking_manager::ticket_scan_url($t)->out(false), "\n"; }
+          echo "wwwroot: $CFG->wwwroot\n";
           set_error_handler(function ($no, $str, $file, $line) { throw new ErrorException($str, 0, $no, $file, $line); });
-          foreach (['L', 'M', 'Q', 'H'] as $lvl) {
-              $fails = [];
-              for ($len = 20; $len <= 160; $len++) {
-                  $url = substr('http://localhost/local/evenements/scan.php?t=' . sha1((string) $len) . sha1('y' . $len) . sha1('z'), 0, $len);
-                  try { (new TCPDF2DBarcode($url, 'QRCODE,' . $lvl))->getBarcodeArray(); } catch (Throwable $e) { $fails[] = $len . ':' . $e->getLine(); }
-              }
-              echo PHP_VERSION, " $lvl fails: ", $fails ? implode(' ', $fails) : 'none', "\n";
-          }
-          $tok = sha1('x');
-          foreach (['http://localhost/moodle', 'http://127.0.0.1:8000', 'http://localhost'] as $root) {
-              $url = $root . '/local/evenements/scan.php?t=' . $tok;
-              try { (new TCPDF2DBarcode($url, 'QRCODE,M'))->getBarcodeArray(); echo "ok $url\n"; } catch (Throwable $e) { echo "FAIL $url: ", $e->getMessage(), ' @', $e->getLine(), "\n"; }
+          try {
+              $pdf = \local_evenements\ticket_pdf::generate($event, $booking, $tickets);
+              echo "PDF OK ", strlen($pdf), " bytes\n";
+          } catch (Throwable $e) {
+              echo "PDF FAIL: ", $e->getMessage(), "\n", $e->getTraceAsString(), "\n";
           }
           PHP
-          php probe.php
+          CFG=$(pwd)/config.php
+          sed -i "1a require_once('$(pwd)/lib/testing/generator/lib.php');" /tmp/probe.php 2>/dev/null || true
+          ls lib/testing/generator/lib.php public/lib/testing/generator/lib.php 2>/dev/null
+          GEN=$(ls lib/testing/generator/lib.php public/lib/testing/generator/lib.php 2>/dev/null | head -1)
+          sed -i "2s#.*#require_once('$(pwd)/$GEN');#" /tmp/probe.php
+          sed -i "s#^require(getenv('CFGPATH'));#require('$CFG');#" /tmp/probe.php
+          php /tmp/probe.php 2>&1 | head -60
